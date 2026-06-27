@@ -306,6 +306,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   tr:hover td.vlk-col{background:#FBEFCF;}
   th.vlk-col{color:#8a6d1f;}
   .vlk-preview-head{font-size:12.5px;font-weight:800;color:var(--ink);margin:14px 0 8px;}
+  .vlk-source-choice{display:flex;gap:10px;flex-wrap:wrap;margin:2px 0 8px;}
+  .vlk-src-btn{
+    border:2px solid var(--line);background:#fff;border-radius:12px;
+    padding:12px 18px;font-weight:700;font-size:14px;color:var(--ink);transition:all .12s;
+  }
+  .vlk-src-btn:hover{border-color:var(--teal);}
+  .vlk-src-btn.active{border-color:var(--teal);background:var(--teal-soft);color:var(--teal-deep);}
   .vlk-preview{
     max-width:980px;border:1px solid var(--line);border-radius:10px;overflow:auto;
     max-height:240px;background:#fff;margin-bottom:6px;
@@ -593,37 +600,50 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           </div>
 
           <div class="pcard pane" id="pane8">
-            <h4><span class="step">8</span> שליפת מידע מקובץ אחר (VLOOKUP)</h4>
-            <p class="sub">מביא מידע מקובץ שני לטבלה שלך, לפי עמודה משותפת. לדוגמה: להביא <b>מחיר</b> מתוך מחירון, מותאם לפי <b>מק"ט</b>.</p>
+            <h4><span class="step">8</span> הבאת מידע מטבלה אחרת (VLOOKUP)</h4>
+            <p class="sub">מחבר שתי טבלאות לפי עמודה משותפת, ומביא מידע מהשנייה לטבלה שלך. לדוגמה: להביא <b>מחיר</b> מתוך מחירון, מותאם לפי <b>מק"ט</b>. המקור יכול להיות גיליון אחר באותו קובץ, או קובץ אחר.</p>
 
             <div class="guide-box">
               <b>איך זה עובד, צעד‑צעד:</b><br>
-              1. העלו קובץ שני (למשל מחירון).<br>
-              2. בחרו את העמודה המשותפת בשני הקבצים (המפתח, למשל מק"ט).<br>
-              3. בחרו אילו עמודות להביא מהקובץ השני.<br>
+              1. בחרו מאיפה להביא את המידע — גיליון אחר באותו קובץ, או קובץ אחר.<br>
+              2. בחרו את העמודה המשותפת לשתי הטבלאות (המפתח, למשל מק"ט).<br>
+              3. בחרו אילו עמודות להביא.<br>
               העמודות יתווספו לטבלה שלך, מותאמות לפי המפתח.
             </div>
 
-            <label class="field-label">1. העלו את הקובץ השני:</label>
-            <button class="pick-btn2" id="vlkPick">בחירת קובץ שני</button>
-            <input type="file" id="vlkFile" accept=".xlsx,.xls,.csv,.tsv" class="visually-hidden">
-            <div id="vlkStatus" class="vlk-status"></div>
-            <div id="vlkFileActions" hidden style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-              <button class="mini" id="vlkReplace">החלפה בקובץ אחר</button>
-              <button class="mini" id="vlkRemove">הסרת הקובץ השני</button>
+            <label class="field-label" style="margin-top:0">1. מאיפה להביא את המידע?</label>
+            <div class="vlk-source-choice">
+              <button class="vlk-src-btn active" id="vlkSrcSame" data-src="same">📑 מגיליון אחר באותו קובץ</button>
+              <button class="vlk-src-btn" id="vlkSrcOther" data-src="other">📁 מקובץ אחר</button>
+            </div>
+
+            <div id="vlkSameWrap">
+              <label class="field-label">בחרו את הגיליון להבאת מידע ממנו:</label>
+              <select id="vlkSheet"></select>
+              <div id="vlkSameNote" class="sub" style="margin-top:6px"></div>
+            </div>
+
+            <div id="vlkOtherWrap" hidden>
+              <button class="pick-btn2" id="vlkPick">בחירת קובץ אחר</button>
+              <input type="file" id="vlkFile" accept=".xlsx,.xls,.csv,.tsv" class="visually-hidden">
+              <div id="vlkStatus" class="vlk-status"></div>
+              <div id="vlkFileActions" hidden style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+                <button class="mini" id="vlkReplace">החלפה בקובץ אחר</button>
+                <button class="mini" id="vlkRemove">הסרת הקובץ</button>
+              </div>
             </div>
 
             <div id="vlkBody" hidden>
-              <div class="vlk-preview-head">תצוגה מקדימה של הקובץ השני — כך נראים השדות והנתונים בו:</div>
+              <div class="vlk-preview-head">תצוגה מקדימה של המקור — כך נראים השדות והנתונים:</div>
               <div class="vlk-preview" id="vlkPreview"></div>
               <label class="field-label">2. העמודה המשותפת <u>בקובץ שלך</u>:</label>
               <select id="vlkMainKey"></select>
-              <label class="field-label">3. אותה עמודה <u>בקובץ השני</u>:</label>
+              <label class="field-label">3. אותה עמודה <u>במקור</u>:</label>
               <select id="vlkSrcKey"></select>
-              <label class="field-label">4. אילו עמודות מהקובץ השני להביא?</label>
+              <label class="field-label">4. אילו עמודות להביא מהמקור?</label>
               <p class="sub" style="margin:2px 0 8px">👇 לחצו על שם העמודה כדי לבחור אותה — היא תהפוך לירוקה, והמידע יופיע מיד בטבלה.</p>
               <div class="chips" id="vlkBringChips"></div>
-              <p class="sub" style="margin:8px 0 0">העמודות החדשות יופיעו בטבלה (מסומנות בצהוב). אם מק"ט לא נמצא בקובץ השני — התא יישאר ריק.</p>
+              <p class="sub" style="margin:8px 0 0">העמודות החדשות יופיעו בטבלה (מסומנות בצהוב). אם מק"ט לא נמצא במקור — התא יישאר ריק.</p>
             </div>
           </div>
 
@@ -711,7 +731,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     rowCols:{},        // colIndex -> bool (columns to check for row-deletion values)
     aggMethods:{},     // colIndex -> aggregation method for consolidation
     keyCol:null,       // consolidation key column index
-    vlk:{ loaded:false, headers:[], rows:[], srcKey:0, bring:{} },  // VLOOKUP second file
+    vlk:{ loaded:false, headers:[], rows:[], srcKey:0, bring:{}, source:"same" },  // VLOOKUP second file
     manualDeleted:{},  // dataRowIndex -> true
     computed:null      // last compute result
   };
@@ -735,6 +755,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var highlightDupes=$("highlightDupes");
   var vlkPick=$("vlkPick"), vlkFile=$("vlkFile"), vlkStatus=$("vlkStatus"), vlkBody=$("vlkBody");
   var vlkFileActions=$("vlkFileActions"), vlkReplace=$("vlkReplace"), vlkRemove=$("vlkRemove");
+  var vlkSrcSame=$("vlkSrcSame"), vlkSrcOther=$("vlkSrcOther"), vlkSameWrap=$("vlkSameWrap"), vlkOtherWrap=$("vlkOtherWrap"), vlkSheet=$("vlkSheet"), vlkSameNote=$("vlkSameNote");
   var vlkMainKey=$("vlkMainKey"), vlkSrcKey=$("vlkSrcKey"), vlkBringChips=$("vlkBringChips");
   var pivotOn=$("pivotOn"), pivotBody=$("pivotBody"), pivotGroup=$("pivotGroup"), pivotAgg=$("pivotAgg"), pivotVal=$("pivotVal"), pivotValWrap=$("pivotValWrap");
   var aggList=$("aggList"), addCount=$("addCount"), joinSep=$("joinSep");
@@ -1249,6 +1270,19 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     renderRowColChips();
     renderConsolidation();
     populateMainSelects();
+    // VLOOKUP source: if "same file", (re)load from the selected other sheet
+    if(state.vlk.source==="same"){
+      if(populateVlkSheets()>0){
+        vlkSrcSame.classList.add("active"); vlkSrcOther.classList.remove("active");
+        vlkSameWrap.hidden=false; vlkOtherWrap.hidden=true;
+        loadVlkFromSheet(vlkSheet.value);
+      } else {
+        // no other sheet available — offer the file option instead
+        state.vlk.source="other";
+        vlkSrcSame.classList.remove("active"); vlkSrcOther.classList.add("active");
+        vlkSameWrap.hidden=true; vlkOtherWrap.hidden=false;
+      }
+    }
   }
 
   function fillSelect(sel, names, keepValue){
@@ -1316,6 +1350,32 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     }
     vlkSrcKey.value=String(state.vlk.srcKey);
   }
+  function setVlkData(aoa){
+    if(!aoa || !aoa.length) return false;
+    var headers=aoa[0].map(function(h,i){ return (h!==undefined&&h!==null&&String(h).trim()!=="")?String(h):("עמודה "+(i+1)); });
+    state.vlk.headers=headers;
+    state.vlk.rows=aoa.slice(1);
+    state.vlk.loaded=true;
+    state.vlk.srcKey=0;
+    state.vlk.bring={};
+    populateVlkSrcKey();
+    renderVlkBringChips();
+    renderVlkPreview();
+    vlkBody.hidden=false;
+    refresh();
+    return true;
+  }
+
+  function loadVlkFromSheet(name){
+    if(!state.workbook || !name) return;
+    try{
+      var ws=state.workbook.Sheets[name];
+      var aoa=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:"",blankrows:false});
+      if(!setVlkData(aoa)){ vlkSameNote.textContent="הגיליון ריק."; return; }
+      vlkSameNote.textContent="✓ מביא מהגיליון: "+name+" ("+state.vlk.rows.length+" שורות, "+state.vlk.headers.length+" עמודות)";
+    }catch(err){ vlkSameNote.textContent="לא הצלחתי לקרוא את הגיליון."; }
+  }
+
   function loadVlkFile(file){
     if(!file) return;
     var reader=new FileReader();
@@ -1324,26 +1384,53 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         var wb=XLSX.read(e.target.result,{type:"array",cellDates:true});
         var ws=wb.Sheets[wb.SheetNames[0]];
         var aoa=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:"",blankrows:false});
-        if(!aoa.length){ vlkStatus.textContent="הקובץ השני ריק."; return; }
-        var headers=aoa[0].map(function(h,i){ return (h!==undefined&&h!==null&&String(h).trim()!=="")?String(h):("עמודה "+(i+1)); });
-        state.vlk.headers=headers;
-        state.vlk.rows=aoa.slice(1);
-        state.vlk.loaded=true;
-        state.vlk.srcKey=0;
-        state.vlk.bring={};
-        vlkStatus.textContent="✓ נטען: "+file.name+" ("+state.vlk.rows.length+" שורות, "+headers.length+" עמודות)";
-        populateVlkSrcKey();
-        renderVlkBringChips();
-        renderVlkPreview();
-        vlkBody.hidden=false;
+        if(!setVlkData(aoa)){ vlkStatus.textContent="הקובץ ריק."; return; }
+        vlkStatus.textContent="✓ נטען: "+file.name+" ("+state.vlk.rows.length+" שורות, "+state.vlk.headers.length+" עמודות)";
         vlkPick.hidden=true;
         vlkFileActions.hidden=false;
-        refresh();
       }catch(err){
-        vlkStatus.textContent="לא הצלחתי לקרוא את הקובץ השני. ודאו שזה אקסל או CSV תקין.";
+        vlkStatus.textContent="לא הצלחתי לקרוא את הקובץ. ודאו שזה אקסל או CSV תקין.";
       }
     };
     reader.readAsArrayBuffer(file);
+  }
+
+  function populateVlkSheets(){
+    var prev=vlkSheet.value;
+    var names=(state.sheetNames||[]).filter(function(n){ return n!==state.activeSheet; });
+    vlkSheet.innerHTML="";
+    for(var i=0;i<names.length;i++){
+      var o=document.createElement("option"); o.value=names[i]; o.textContent=names[i]; vlkSheet.appendChild(o);
+    }
+    if(names.length===0){
+      vlkSameNote.textContent="בקובץ הזה אין גיליון נוסף. השתמשו ב\"מקובץ אחר\".";
+      vlkSheet.disabled=true;
+    } else {
+      vlkSheet.disabled=false;
+      if(prev && names.indexOf(prev)!==-1) vlkSheet.value=prev;
+    }
+    return names.length;
+  }
+
+  function clearVlk(){
+    state.vlk.loaded=false; state.vlk.headers=[]; state.vlk.rows=[]; state.vlk.srcKey=0; state.vlk.bring={};
+    vlkBody.hidden=true; refresh();
+  }
+
+  function setVlkSource(src){
+    state.vlk.source=src;
+    vlkSrcSame.classList.toggle("active", src==="same");
+    vlkSrcOther.classList.toggle("active", src==="other");
+    vlkSameWrap.hidden=(src!=="same");
+    vlkOtherWrap.hidden=(src!=="other");
+    if(src==="same"){
+      var hasOther=populateVlkSheets();
+      if(hasOther) loadVlkFromSheet(vlkSheet.value);
+      else clearVlk();
+    } else {
+      clearVlk();
+      vlkPick.hidden=false; vlkFileActions.hidden=true; vlkStatus.textContent="";
+    }
   }
 
   function defaultAgg(label){
@@ -1726,7 +1813,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     appView.hidden=true; uploadView.hidden=false; resetBtn.hidden=true;
     appGrid.hidden=true; choosePrompt.hidden=true; sheetTabsWrap.hidden=true;
     fileInput.value=""; state.aoa=[]; state.computed=null; state.activeSheet=null;
-    state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}}; vlkBody.hidden=true; vlkStatus.textContent=""; vlkFileActions.hidden=true; vlkPick.hidden=false;
+    state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}, source:"same"}; vlkBody.hidden=true; vlkStatus.textContent=""; vlkFileActions.hidden=true; vlkPick.hidden=false;
     pivotOn.checked=false; pivotBody.hidden=true; pivotValWrap.hidden=true;
   });
 
@@ -1791,10 +1878,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   // VLOOKUP events
   vlkPick.addEventListener("click",function(){ vlkFile.click(); });
+  vlkSrcSame.addEventListener("click",function(){ setVlkSource("same"); });
+  vlkSrcOther.addEventListener("click",function(){ setVlkSource("other"); });
+  vlkSheet.addEventListener("change",function(){ loadVlkFromSheet(vlkSheet.value); });
   vlkReplace.addEventListener("click",function(){ vlkFile.click(); });
   vlkRemove.addEventListener("click",function(){
-    state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}};
+    state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}, source:"same"};
     vlkBody.hidden=true; vlkFileActions.hidden=true; vlkPick.hidden=false; vlkStatus.textContent="";
+    state.vlk.source="other";
     refresh();
   });
   vlkFile.addEventListener("change",function(e){
@@ -1846,7 +1937,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     rowMatch.value="contains"; dropEmpty.checked=false; dedupe.checked=false;
     consolidateOn.checked=false; consolidateBody.hidden=true; highlightDupes.checked=false;
     state.aggMethods={}; state.keyCol=null; addCount.checked=true; joinSep.value=", ";
-    state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}}; vlkBody.hidden=true; vlkStatus.textContent=""; vlkFileActions.hidden=true; vlkPick.hidden=false;
+    state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}, source:"same"}; vlkBody.hidden=true; vlkStatus.textContent=""; vlkFileActions.hidden=true; vlkPick.hidden=false;
     pivotOn.checked=false; pivotBody.hidden=true; pivotAgg.value="count"; pivotValWrap.hidden=true;
     rebuildColumnUI(); refresh();
   });
