@@ -141,8 +141,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .formats code{background:var(--line-soft);border-radius:5px;padding:2px 7px;font-size:11.5px;}
 
   /* ---------- app layout ---------- */
-  .app{display:block;}
-  .app > .panel{margin-bottom:22px;}
+  .app{display:flex;flex-direction:column;}
+  .app[hidden]{display:none;}
+  .app > .panel{order:2;margin-top:22px;}
 
   .panel{
     background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
@@ -153,6 +154,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .pane textarea, .pane input[type=text], .pane select{max-width:560px;}
   .pane .chips{max-width:980px;}
   .agg-list{max-width:680px;}
+  .data-heading{font-size:13px;font-weight:800;color:var(--ink);margin:0 2px 8px;display:flex;align-items:center;gap:8px;}
+  .data-heading svg{color:var(--teal-deep);}
+  .tools-heading{font-size:14px;font-weight:800;color:var(--ink);padding:16px 18px 0;}
 
   .pcard{padding:18px 18px;border-bottom:1px solid var(--line-soft);}
   .pcard:last-child{border-bottom:none;}
@@ -410,6 +414,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <!-- control panel -->
       <aside class="panel">
         <div class="panel-scroll">
+          <div class="tools-heading">כלים לעריכת הקובץ (לא חובה — הקובץ מוכן להורדה גם בלי כלום)</div>
 
           <div class="pcard">
             <label class="opt" style="margin-top:0">
@@ -569,6 +574,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <svg id="refreshIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
             <span id="refreshLabel">רענן</span>
           </button>
+        </div>
+
+        <div class="data-heading">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+          הנתונים שלך — תצוגה מקדימה (השינויים מסומנים בזמן אמת)
         </div>
 
         <div class="tablewrap" id="tablewrap">
@@ -1149,16 +1159,18 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
     state.activeSheet=null;
     renderSheetTabs();
-    sheetTabsWrap.hidden = false;   // always show the tabs so the user picks
+    // show the sheet tabs only when there is more than one sheet (no need to confuse single-sheet users)
+    sheetTabsWrap.hidden = state.sheetNames.length < 2;
 
     uploadView.hidden=true;
     appView.hidden=false;
     resetBtn.hidden=false;
     tableEmpty.style.display="none";
 
-    // wait for an explicit sheet choice
-    appGrid.hidden=true;
-    choosePrompt.hidden=false;
+    // load the first sheet automatically so the file content appears immediately
+    choosePrompt.hidden=true;
+    appGrid.hidden=false;
+    activateSheet(state.sheetNames[0]);
   }
 
   function renderSheetTabs(){
