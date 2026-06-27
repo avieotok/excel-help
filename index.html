@@ -292,6 +292,19 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   td.changed{background:var(--teal-soft);}
   tr:hover td.changed{background:#cdeae4;}
   .hl-find{background:#FFD3D0;color:#B3261E;border-radius:3px;padding:0 2px;font-weight:800;}
+  .guide-box{
+    background:var(--teal-soft);border:1px solid #bfe5de;border-radius:10px;
+    padding:12px 14px;font-size:12.5px;line-height:1.7;color:#0c5a50;margin:4px 0 14px;
+  }
+  .pick-btn2{
+    background:var(--teal);color:#fff;border:none;border-radius:10px;
+    padding:10px 18px;font-weight:700;font-size:14px;box-shadow:var(--shadow-sm);
+  }
+  .pick-btn2:hover{background:var(--teal-deep);}
+  .vlk-status{font-size:13px;font-weight:600;color:var(--teal-deep);margin-top:10px;min-height:1px;}
+  th.vlk-col, td.vlk-col{background:#FFF6E5;}
+  tr:hover td.vlk-col{background:#FBEFCF;}
+  th.vlk-col{color:#8a6d1f;}
   td.empty-cell{color:#b6c0bc;font-style:italic;}
   tr.dup td{ background:#FFE3E1; }
   tr.dup:hover td{ background:#FBD3D0; }
@@ -432,6 +445,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <button class="ptab" data-pane="pane5">מחיקת עמודות</button>
             <button class="ptab" data-pane="pane6">מחיקת שורות</button>
             <button class="ptab" data-pane="pane7">איחוד רשומות</button>
+            <button class="ptab" data-pane="pane8">שליפת מידע (VLOOKUP)</button>
+            <button class="ptab" data-pane="pane9">טבלת ציר (Pivot)</button>
           </div>
 
           <div class="pcard pane show" id="pane1">
@@ -564,6 +579,59 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             </div>
           </div>
 
+          <div class="pcard pane" id="pane8">
+            <h4><span class="step">8</span> שליפת מידע מקובץ אחר (VLOOKUP)</h4>
+            <p class="sub">מביא מידע מקובץ שני לטבלה שלך, לפי עמודה משותפת. לדוגמה: להביא <b>מחיר</b> מתוך מחירון, מותאם לפי <b>מק"ט</b>.</p>
+
+            <div class="guide-box">
+              <b>איך זה עובד, צעד‑צעד:</b><br>
+              1. העלו קובץ שני (למשל מחירון).<br>
+              2. בחרו את העמודה המשותפת בשני הקבצים (המפתח, למשל מק"ט).<br>
+              3. בחרו אילו עמודות להביא מהקובץ השני.<br>
+              העמודות יתווספו לטבלה שלך, מותאמות לפי המפתח.
+            </div>
+
+            <label class="field-label">1. העלו את הקובץ השני:</label>
+            <button class="pick-btn2" id="vlkPick">בחירת קובץ שני</button>
+            <input type="file" id="vlkFile" accept=".xlsx,.xls,.csv,.tsv" class="visually-hidden">
+            <div id="vlkStatus" class="vlk-status"></div>
+
+            <div id="vlkBody" hidden>
+              <label class="field-label">2. העמודה המשותפת <u>בקובץ שלך</u>:</label>
+              <select id="vlkMainKey"></select>
+              <label class="field-label">3. אותה עמודה <u>בקובץ השני</u>:</label>
+              <select id="vlkSrcKey"></select>
+              <label class="field-label">4. אילו עמודות מהקובץ השני להביא?</label>
+              <div class="chips" id="vlkBringChips"></div>
+              <p class="sub" style="margin:8px 0 0">העמודות החדשות יופיעו בטבלה בצד שמאל, מסומנות. אם מק"ט לא נמצא בקובץ השני — התא יישאר ריק.</p>
+            </div>
+          </div>
+
+          <div class="pcard pane" id="pane9">
+            <h4><span class="step">9</span> טבלת ציר — סיכום (Pivot)</h4>
+            <p class="sub">מסכם את הנתונים לטבלה קטנה: בוחרים עמודה לקיבוץ, ומקבלים סיכום או ספירה לכל ערך. לדוגמה: כמה כמות יש בכל מיקום.</p>
+
+            <div class="guide-box">
+              <b>מה זה נותן?</b> במקום אלפי שורות — שורה אחת לכל ערך, עם סיכום. למשל כל מיקום והכמות הכוללת בו.
+            </div>
+
+            <label class="opt" style="margin-top:0"><input type="checkbox" id="pivotOn"> הצג טבלת ציר (מחליף את התצוגה)</label>
+
+            <div id="pivotBody" hidden>
+              <label class="field-label">קבץ לפי (כל ערך יהיה שורה):</label>
+              <select id="pivotGroup"></select>
+              <label class="field-label">מה לחשב:</label>
+              <select id="pivotAgg">
+                <option value="count">ספירה — כמה שורות בכל ערך</option>
+                <option value="sum">סכום — לסכום עמודת מספרים</option>
+              </select>
+              <div id="pivotValWrap" hidden>
+                <label class="field-label">עמודת המספרים לסכימה:</label>
+                <select id="pivotVal"></select>
+              </div>
+            </div>
+          </div>
+
         </div>
       </aside>
 
@@ -623,6 +691,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     rowCols:{},        // colIndex -> bool (columns to check for row-deletion values)
     aggMethods:{},     // colIndex -> aggregation method for consolidation
     keyCol:null,       // consolidation key column index
+    vlk:{ loaded:false, headers:[], rows:[], srcKey:0, bring:{} },  // VLOOKUP second file
     manualDeleted:{},  // dataRowIndex -> true
     computed:null      // last compute result
   };
@@ -644,6 +713,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var dedupe=$("dedupe"), statCols=$("statCols"), resetSettings=$("resetSettings");
   var consolidateOn=$("consolidateOn"), consolidateBody=$("consolidateBody"), keyCol=$("keyCol");
   var highlightDupes=$("highlightDupes");
+  var vlkPick=$("vlkPick"), vlkFile=$("vlkFile"), vlkStatus=$("vlkStatus"), vlkBody=$("vlkBody");
+  var vlkMainKey=$("vlkMainKey"), vlkSrcKey=$("vlkSrcKey"), vlkBringChips=$("vlkBringChips");
+  var pivotOn=$("pivotOn"), pivotBody=$("pivotBody"), pivotGroup=$("pivotGroup"), pivotAgg=$("pivotAgg"), pivotVal=$("pivotVal"), pivotValWrap=$("pivotValWrap");
   var aggList=$("aggList"), addCount=$("addCount"), joinSep=$("joinSep");
   var rowValues=$("rowValues"), rowColChips=$("rowColChips"), rowMatch=$("rowMatch"), dropEmpty=$("dropEmpty");
   var rowSelAll=$("rowSelAll"), rowSelNone=$("rowSelNone");
@@ -1003,12 +1075,17 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     var total=rows.length;
     var shown=Math.min(total, PREVIEW_LIMIT);
 
+    var vlkActive=isVlookupActive();
+    var vMap=null, vBring=null, vNames=null, vMainKey=0;
+    if(vlkActive){ vMap=vlkBuildMap(); vBring=vlkBringList(); vNames=vlkHeaderNames(); vMainKey=parseInt(vlkMainKey.value,10); }
+
     var html=['<table><thead><tr>',
       '<th class="rownum-h">#</th>',
       '<th class="del-col" title="סמן למחיקה">✕</th>'];
     for(var j=0;j<state.ncols;j++){
       html.push('<th class="'+(state.dropCols[j]?'col-dropped':'')+'">'+escHtml(names[j])+'</th>');
     }
+    if(vlkActive){ for(var vh=0;vh<vNames.length;vh++) html.push('<th class="vlk-col">'+escHtml(vNames[vh])+'</th>'); }
     html.push('</tr></thead><tbody>');
 
     for(var r=0;r<shown;r++){
@@ -1029,6 +1106,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         }
         var dot = (changed[c] && !state.dropCols[c]) ? '<span class="changed-tag" title="שונה"></span>' : '';
         html.push('<td class="'+cls.join(" ")+'" title="'+escAttr(v)+'">'+cellTxt+dot+'</td>');
+      }
+      if(vlkActive){
+        var vv=vlkValuesFor(rows[r][vMainKey], vMap, vBring);
+        for(var vc=0;vc<vv.length;vc++){
+          var vt=fmt(vv[vc]);
+          html.push('<td class="vlk-col'+(vt===""?" empty-cell":"")+'" title="'+escAttr(vt)+'">'+(vt===""?"—":escHtml(vt))+'</td>');
+        }
       }
       html.push('</tr>');
     }
@@ -1088,10 +1172,33 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   function refresh(){
     if(!state.aoa.length) return;
     var res=compute();
+    if(isPivotActive()){
+      renderSummary(res, null);
+      renderPivotTable(computePivot(survivingRows(res)));
+      return;
+    }
     var cons = isConsolidating() ? consolidateRows(survivingRows(res)) : null;
     renderSummary(res, cons);
     if(cons) renderConsolidatedTable(cons);
     else renderTable(res);
+  }
+
+  function renderPivotTable(piv){
+    var html=['<table><thead><tr>',
+      '<th class="rownum-h">#</th>',
+      '<th>'+escHtml(piv.groupName)+'</th>',
+      '<th>'+escHtml(piv.resultName)+'</th>',
+      '</tr></thead><tbody>'];
+    var total=piv.rows.length, shown=Math.min(total, PREVIEW_LIMIT);
+    for(var r=0;r<shown;r++){
+      var g=piv.rows[r][0], v=piv.rows[r][1];
+      html.push('<tr><td class="rownum">'+(r+1)+'</td><td>'+escHtml(g)+'</td><td class="rownum" style="text-align:right;font-weight:700">'+(typeof v==="number"?v.toLocaleString("he-IL"):escHtml(v))+'</td></tr>');
+    }
+    html.push('<tr style="background:#f3f6f5;font-weight:800"><td></td><td>סה"כ</td><td class="rownum" style="text-align:right;font-weight:800">'+piv.total.toLocaleString("he-IL")+'</td></tr>');
+    html.push('</tbody></table>');
+    tablewrap.innerHTML=html.join("");
+    tableNote.hidden=false;
+    tableNote.textContent="טבלת ציר: "+piv.rows.length.toLocaleString("he-IL")+" ערכים שונים. הורידו אותה עם 'הורד אקסל נקי'.";
   }
 
   function renderDropColChips(){
@@ -1120,6 +1227,74 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     renderDropColChips();
     renderRowColChips();
     renderConsolidation();
+    populateMainSelects();
+  }
+
+  function fillSelect(sel, names, keepValue){
+    var cur = keepValue ? sel.value : "";
+    sel.innerHTML="";
+    for(var j=0;j<names.length;j++){
+      var o=document.createElement("option"); o.value=String(j); o.textContent=names[j]; sel.appendChild(o);
+    }
+    if(keepValue && cur!=="" && parseInt(cur,10)<names.length) sel.value=cur;
+  }
+  function populateMainSelects(){
+    var names=headerNames();
+    fillSelect(vlkMainKey, names, true);
+    fillSelect(pivotGroup, names, true);
+    fillSelect(pivotVal, names, true);
+  }
+
+  // ---- VLOOKUP second-file loading ----
+  function renderVlkBringChips(){
+    vlkBringChips.innerHTML="";
+    for(var j=0;j<state.vlk.headers.length;j++){
+      (function(idx,label){
+        if(idx===state.vlk.srcKey) return; // don't offer the key column itself
+        var b=document.createElement("button");
+        b.className="chip"+(state.vlk.bring[idx]?" on":"");
+        b.textContent=label; b.title=label;
+        b.addEventListener("click",function(){
+          state.vlk.bring[idx]=!state.vlk.bring[idx];
+          b.classList.toggle("on", state.vlk.bring[idx]);
+          refresh();
+        });
+        vlkBringChips.appendChild(b);
+      })(j, state.vlk.headers[j]||("עמודה "+(j+1)));
+    }
+  }
+  function populateVlkSrcKey(){
+    vlkSrcKey.innerHTML="";
+    for(var j=0;j<state.vlk.headers.length;j++){
+      var o=document.createElement("option"); o.value=String(j); o.textContent=state.vlk.headers[j]||("עמודה "+(j+1)); vlkSrcKey.appendChild(o);
+    }
+    vlkSrcKey.value=String(state.vlk.srcKey);
+  }
+  function loadVlkFile(file){
+    if(!file) return;
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        var wb=XLSX.read(e.target.result,{type:"array",cellDates:true});
+        var ws=wb.Sheets[wb.SheetNames[0]];
+        var aoa=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:"",blankrows:false});
+        if(!aoa.length){ vlkStatus.textContent="הקובץ השני ריק."; return; }
+        var headers=aoa[0].map(function(h,i){ return (h!==undefined&&h!==null&&String(h).trim()!=="")?String(h):("עמודה "+(i+1)); });
+        state.vlk.headers=headers;
+        state.vlk.rows=aoa.slice(1);
+        state.vlk.loaded=true;
+        state.vlk.srcKey=0;
+        state.vlk.bring={};
+        vlkStatus.textContent="✓ נטען: "+file.name+" ("+state.vlk.rows.length+" שורות, "+headers.length+" עמודות)";
+        populateVlkSrcKey();
+        renderVlkBringChips();
+        vlkBody.hidden=false;
+        refresh();
+      }catch(err){
+        vlkStatus.textContent="לא הצלחתי לקרוא את הקובץ השני. ודאו שזה אקסל או CSV תקין.";
+      }
+    };
+    reader.readAsArrayBuffer(file);
   }
 
   function defaultAgg(label){
@@ -1333,6 +1508,57 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   function isConsolidating(){
     return consolidateOn.checked && state.keyCol!==null && state.keyCol!==undefined && state.keyCol<state.ncols;
   }
+
+  // ---------- VLOOKUP (second file) ----------
+  function vlkBringList(){
+    var out=[]; for(var j=0;j<state.vlk.headers.length;j++){ if(state.vlk.bring[j]) out.push(j); } return out;
+  }
+  function isVlookupActive(){
+    return state.vlk.loaded && vlkBringList().length>0 &&
+           vlkMainKey.value!=="" && vlkMainKey.value<state.ncols &&
+           state.vlk.srcKey<state.vlk.headers.length;
+  }
+  function vlkBuildMap(){
+    var map={}, sk=state.vlk.srcKey, rows=state.vlk.rows;
+    for(var i=0;i<rows.length;i++){
+      var k=valStr(rows[i][sk]).trim();
+      if(k!=="" && !(k in map)) map[k]=rows[i];
+    }
+    return map;
+  }
+  function vlkHeaderNames(){
+    var bring=vlkBringList(), names=[];
+    for(var i=0;i<bring.length;i++){ names.push(state.vlk.headers[bring[i]]||("עמודה "+(bring[i]+1))); }
+    return names;
+  }
+  function vlkValuesFor(keyVal, map, bring){
+    var row=map[valStr(keyVal).trim()], out=[];
+    for(var i=0;i<bring.length;i++){ out.push(row ? (row[bring[i]]==null?"":row[bring[i]]) : ""); }
+    return out;
+  }
+
+  // ---------- Pivot ----------
+  function isPivotActive(){
+    return pivotOn.checked && pivotGroup.value!=="" && parseInt(pivotGroup.value,10)<state.ncols;
+  }
+  function computePivot(rows){
+    var gCol=parseInt(pivotGroup.value,10);
+    var agg=pivotAgg.value;
+    var vCol=parseInt(pivotVal.value,10);
+    var order=[], acc={};
+    for(var i=0;i<rows.length;i++){
+      var g=valStr(rows[i][gCol]).trim(); if(g==="") g="(ריק)";
+      if(!(g in acc)){ acc[g]=0; order.push(g); }
+      if(agg==="count") acc[g]+=1;
+      else { var n=Number(valStr(rows[i][vCol]).trim()); if(valStr(rows[i][vCol]).trim()!=="" && !isNaN(n)) acc[g]+=n; }
+    }
+    var out=order.map(function(g){ return [g, acc[g]]; });
+    out.sort(function(a,b){ return b[1]-a[1]; });
+    var total=0; for(var t=0;t<out.length;t++) total+=out[t][1];
+    var names=headerNames();
+    var resultName = (agg==="count") ? "מספר שורות" : ("סכום של "+(names[vCol]||""));
+    return { rows:out, total:total, groupName:names[gCol]||"", resultName:resultName };
+  }
   // surviving cleaned rows (post deletion)
   function survivingRows(res){
     var out=[];
@@ -1342,6 +1568,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   function buildOutputAoa(){
     var res=state.computed || compute();
+
+    if(isPivotActive()){
+      var piv=computePivot(survivingRows(res));
+      var po=[[piv.groupName, piv.resultName]];
+      for(var pi=0;pi<piv.rows.length;pi++){ po.push([piv.rows[pi][0], piv.rows[pi][1]]); }
+      po.push(["סה\"כ", piv.total]);
+      return po;
+    }
 
     if(isConsolidating()){
       var cons=consolidateRows(survivingRows(res));
@@ -1359,13 +1593,25 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       return out;
     }
 
+    // normal output (with optional VLOOKUP appended columns)
+    var vlkActive=isVlookupActive();
+    var vMap=null, vBring=null, vNames=null, vMainKey=0;
+    if(vlkActive){ vMap=vlkBuildMap(); vBring=vlkBringList(); vNames=vlkHeaderNames(); vMainKey=parseInt(vlkMainKey.value,10); }
+
     var out2=[];
     if(hasHeader.checked && state.aoa.length){
-      out2.push(dropFilter(state.aoa[0].slice(0,state.ncols)));
+      var h2=dropFilter(state.aoa[0].slice(0,state.ncols));
+      if(vlkActive){ for(var vh=0;vh<vNames.length;vh++) h2.push(vNames[vh]); }
+      out2.push(h2);
     }
     for(var r=0;r<res.cleaned.length;r++){
       if(res.deleted[r]) continue;
-      out2.push(dropFilter(res.cleaned[r]));
+      var orow=dropFilter(res.cleaned[r]);
+      if(vlkActive){
+        var vv=vlkValuesFor(res.cleaned[r][vMainKey], vMap, vBring);
+        for(var vc=0;vc<vv.length;vc++) orow.push(vv[vc]);
+      }
+      out2.push(orow);
     }
     return out2;
   }
@@ -1431,6 +1677,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     appView.hidden=true; uploadView.hidden=false; resetBtn.hidden=true;
     appGrid.hidden=true; choosePrompt.hidden=true; sheetTabsWrap.hidden=true;
     fileInput.value=""; state.aoa=[]; state.computed=null; state.activeSheet=null;
+    state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}}; vlkBody.hidden=true; vlkStatus.textContent="";
+    pivotOn.checked=false; pivotBody.hidden=true; pivotValWrap.hidden=true;
   });
 
   hasHeader.addEventListener("change",function(){ rebuildColumnUI(); refresh(); });
@@ -1491,6 +1739,32 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     refresh();
   });
   highlightDupes.addEventListener("change",refresh);
+
+  // VLOOKUP events
+  vlkPick.addEventListener("click",function(){ vlkFile.click(); });
+  vlkFile.addEventListener("change",function(e){
+    var f=e.target.files && e.target.files[0];
+    if(f) loadVlkFile(f);
+    vlkFile.value="";
+  });
+  vlkMainKey.addEventListener("change",refresh);
+  vlkSrcKey.addEventListener("change",function(){
+    state.vlk.srcKey=parseInt(vlkSrcKey.value,10)||0;
+    renderVlkBringChips();
+    refresh();
+  });
+
+  // Pivot events
+  pivotOn.addEventListener("change",function(){
+    pivotBody.hidden=!pivotOn.checked;
+    refresh();
+  });
+  pivotGroup.addEventListener("change",refresh);
+  pivotAgg.addEventListener("change",function(){
+    pivotValWrap.hidden=(pivotAgg.value!=="sum");
+    refresh();
+  });
+  pivotVal.addEventListener("change",refresh);
   keyCol.addEventListener("change",function(e){
     state.keyCol=parseInt(e.target.value,10);
     renderAggList();
@@ -1516,6 +1790,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     rowMatch.value="contains"; dropEmpty.checked=false; dedupe.checked=false;
     consolidateOn.checked=false; consolidateBody.hidden=true; highlightDupes.checked=false;
     state.aggMethods={}; state.keyCol=null; addCount.checked=true; joinSep.value=", ";
+    state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}}; vlkBody.hidden=true; vlkStatus.textContent="";
+    pivotOn.checked=false; pivotBody.hidden=true; pivotAgg.value="count"; pivotValWrap.hidden=true;
     rebuildColumnUI(); refresh();
   });
 
