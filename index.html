@@ -313,6 +313,29 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
   .vlk-src-btn:hover{border-color:var(--teal);}
   .vlk-src-btn.active{border-color:var(--teal);background:var(--teal-soft);color:var(--teal-deep);}
+  .sum-result{
+    margin-top:16px;background:var(--teal-soft);border:1px solid #bfe5de;border-radius:12px;
+    padding:18px 20px;max-width:560px;
+  }
+  .sum-result .sum-big{font-size:30px;font-weight:800;color:var(--teal-deep);letter-spacing:-.5px;}
+  .sum-result .sum-label{font-size:13px;color:#0c5a50;margin-bottom:6px;font-weight:700;}
+  .sum-result .sum-meta{font-size:12.5px;color:#0c5a50;margin-top:8px;line-height:1.6;}
+  .suggest-box{margin-top:18px;border-top:1px solid var(--line);padding-top:16px;}
+  .suggest-title{font-size:14px;font-weight:800;color:var(--ink);}
+  .suggest-summary{font-size:13px;font-weight:700;color:var(--teal-deep);margin:12px 0 8px;}
+  .suggest-item{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fff;max-width:760px;
+  }
+  .suggest-item .si-reason{font-weight:700;color:#b3261e;font-size:12.5px;white-space:nowrap;}
+  .suggest-item .si-preview{flex:1;min-width:140px;font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;}
+  .suggest-item .si-actions{display:flex;gap:6px;}
+  .si-del{background:#e85544;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-weight:700;font-size:12.5px;}
+  .si-del:hover{background:#d4422f;}
+  .si-keep{background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-weight:700;font-size:12.5px;color:var(--muted);}
+  .si-keep:hover{border-color:var(--teal);color:var(--teal-deep);}
+  .suggest-none{font-size:13px;color:var(--teal-deep);font-weight:700;margin-top:12px;}
+  .si-all{margin:4px 0 12px;}
   .vlk-preview{
     max-width:980px;border:1px solid var(--line);border-radius:10px;overflow:auto;
     max-height:240px;background:#fff;margin-bottom:6px;
@@ -326,6 +349,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .vlk-preview th.keycol,.vlk-preview td.keycol{background:#FFF6E5;font-weight:700;}
   .vlk-preview .pv-more{padding:6px 10px;font-size:12px;color:var(--muted);background:#fafbfb;}
   td.empty-cell{color:#b6c0bc;font-style:italic;}
+  td.editable{cursor:text;}
+  td.editable:hover{box-shadow:inset 0 0 0 2px #cdeae4;}
+  th.editable-h{cursor:text;}
+  th.editable-h:hover{box-shadow:inset 0 0 0 2px #cdeae4;}
+  .cell-edit{
+    width:100%;box-sizing:border-box;border:1.5px solid var(--teal);border-radius:5px;
+    padding:5px 7px;font:inherit;text-align:right;background:#fff;color:var(--ink);outline:none;
+  }
   tr.dup td{ background:#FFE3E1; }
   tr.dup:hover td{ background:#FBD3D0; }
   tr.dup td.changed{ background:#F4D9D6; }
@@ -455,6 +486,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
               <input type="checkbox" id="hasHeader" checked>
               השורה הראשונה היא כותרת
             </label>
+            <label class="opt" id="dropHeaderWrap">
+              <input type="checkbox" id="dropHeaderRow">
+              אל תכלול את שורת הכותרת בקובץ המורד (הורד רק את הנתונים)
+            </label>
           </div>
 
           <div class="ptabs" id="ptabs">
@@ -467,11 +502,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <button class="ptab" data-pane="pane7">איחוד רשומות</button>
             <button class="ptab" data-pane="pane8">שליפת מידע (VLOOKUP)</button>
             <button class="ptab" data-pane="pane9">טבלת ציר (Pivot)</button>
+            <button class="ptab" data-pane="pane10">חיבור</button>
           </div>
 
           <div class="pcard pane show" id="pane1">
             <h4><span class="step">1</span> עמודות לעריכה</h4>
-            <p class="sub">העמודות שבהן יחולו מחיקת המילים (שלב 2). חיפוש והחלפה (שלב 3) בוחר עמודות בעצמו.</p>
+            <p class="sub">לא חובה. כברירת מחדל מחיקת המילים (שלב 2) חלה על <b>כל העמודות</b>. בחרו עמודות כאן רק אם תרצו להגביל את מחיקת המילים לעמודות מסוימות. (חיפוש והחלפה בשלב 3 בוחר עמודות בעצמו.)</p>
             <div class="chip-tools">
               <button class="mini" id="selAll">בחר הכול</button>
               <button class="mini" id="selNone">נקה בחירה</button>
@@ -481,7 +517,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
           <div class="pcard pane" id="pane2">
             <h4><span class="step">2</span> מילים למחיקה</h4>
-            <p class="sub">כל מילה או ביטוי בשורה נפרדת (או מופרדים בפסיקים). הם יוסרו מהתאים בעמודות שבחרתם.</p>
+            <p class="sub">כל מילה או ביטוי בשורה נפרדת (או מופרדים בפסיקים). הם יוסרו מכל התאים. כברירת מחדל זה חל על כל העמודות (אפשר להגביל בלשונית "עמודות לעריכה").</p>
             <textarea id="wordsInput" placeholder="לדוגמה:&#10;לא רלוונטי&#10;זמני&#10;***"></textarea>
             <label class="field-label">היכן בתא המילה צריכה להופיע?</label>
             <select id="matchPos" aria-label="מיקום המילה בתא">
@@ -516,7 +552,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
           <div class="pcard pane" id="pane4">
             <h4><span class="step">4</span> הוספת טקסט</h4>
-            <p class="sub">הוסיפו מילה או משפט לתאים בעמודות שתבחרו — בתחילת התא או בסופו.</p>
+            <p class="sub">הוסיפו מילה או משפט בתחילת התא או בסופו. בחרו עמודות למטה; אם לא תבחרו — הטקסט יתווסף לכל העמודות.</p>
 
             <label class="field-label">טקסט להוספה:</label>
             <input type="text" id="addText" placeholder="לדוגמה: לבדיקה">
@@ -577,6 +613,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <label class="opt" style="margin-top:10px"><input type="checkbox" id="dedupe"> מחק שורות כפולות (השאר את המופע הראשון)</label>
             <p class="sub" style="margin:14px 0 0">אפשר גם לסמן שורות ידנית בטבלה ←</p>
             <button class="mini" id="clearManual" style="margin-top:6px" hidden>בטל סימון ידני (<span id="manualCount">0</span>)</button>
+
+            <div class="suggest-box">
+              <div class="suggest-title">💡 הצעות חכמות למחיקה</div>
+              <p class="sub" style="margin:2px 0 10px">האפליקציה תסרוק את הנתונים ותציע שורות שאולי כדאי למחוק (ריקות, כפולות, כמעט ריקות). תחליטו לכל אחת.</p>
+              <button class="pick-btn2" id="suggestBtn">🔍 הצע לי שורות למחיקה</button>
+              <div id="suggestResults"></div>
+            </div>
           </div>
 
           <div class="pcard pane" id="pane7">
@@ -672,6 +715,20 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             </div>
           </div>
 
+          <div class="pcard pane" id="pane10">
+            <h4><span class="step">10</span> חיבור — סכום של עמודה</h4>
+            <p class="sub">בחרו עמודה של מספרים, ולחצו "חשב סכום" כדי לראות את הסכום הכולל שלה (לפי הנתונים הנוכחיים, אחרי ניקוי ומחיקות).</p>
+
+            <label class="field-label" style="margin-top:0">בחרו עמודה לסיכום:</label>
+            <select id="sumCol"></select>
+
+            <button class="pick-btn2" id="sumBtn" style="margin-top:14px">חשב סכום</button>
+
+            <div id="sumResult" class="sum-result" hidden></div>
+
+            <label class="opt" style="margin-top:16px"><input type="checkbox" id="sumInOutput"> הוסף את הסכום כשורה בתחתית הקובץ המורד</label>
+          </div>
+
         </div>
       </aside>
 
@@ -700,13 +757,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
         <div class="data-heading">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
-          הנתונים שלך — תצוגה מקדימה (השינויים מסומנים בזמן אמת)
+          הנתונים שלך — תצוגה מקדימה (לחצו על תא כדי לערוך אותו; השינויים מסומנים בזמן אמת)
         </div>
 
         <div class="tablewrap" id="tablewrap">
           <div class="empty-state" id="tableEmpty">טוען נתונים…</div>
         </div>
         <p class="table-note" id="tableNote" hidden></p>
+        <button class="mini" id="addRowBtn" style="margin-top:6px">➕ הוסף שורה ריקה</button>
       </div>
     </div>
   </section>
@@ -737,6 +795,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   };
 
   var PREVIEW_LIMIT = 600;
+  var activePane = "pane1";
+  function activeViewMode(){
+    if(activePane==="pane9" && isPivotActive()) return "pivot";
+    if(activePane==="pane7" && isConsolidating()) return "consolidate";
+    return "normal";
+  }
 
   // ---------- elements ----------
   var $ = function(id){ return document.getElementById(id); };
@@ -758,6 +822,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var vlkSrcSame=$("vlkSrcSame"), vlkSrcOther=$("vlkSrcOther"), vlkSameWrap=$("vlkSameWrap"), vlkOtherWrap=$("vlkOtherWrap"), vlkSheet=$("vlkSheet"), vlkSameNote=$("vlkSameNote");
   var vlkMainKey=$("vlkMainKey"), vlkSrcKey=$("vlkSrcKey"), vlkBringChips=$("vlkBringChips");
   var pivotOn=$("pivotOn"), pivotBody=$("pivotBody"), pivotGroup=$("pivotGroup"), pivotAgg=$("pivotAgg"), pivotVal=$("pivotVal"), pivotValWrap=$("pivotValWrap");
+  var sumCol=$("sumCol"), sumBtn=$("sumBtn"), sumResult=$("sumResult"), sumInOutput=$("sumInOutput");
+  var dropHeaderRow=$("dropHeaderRow"), dropHeaderWrap=$("dropHeaderWrap");
   var aggList=$("aggList"), addCount=$("addCount"), joinSep=$("joinSep");
   var rowValues=$("rowValues"), rowColChips=$("rowColChips"), rowMatch=$("rowMatch"), dropEmpty=$("dropEmpty");
   var rowSelAll=$("rowSelAll"), rowSelNone=$("rowSelNone");
@@ -771,6 +837,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   // ---------- helpers ----------
   function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); }
   function colLabel(j){ return XLSX.utils.encode_col(j); }
+  function uiHeaderNames(){
+    var n=headerNames();
+    return n.map(function(x,i){
+      var L=colLabel(i);
+      return (x==="עמודה "+L) ? ("עמודה "+L) : (L+" · "+x);
+    });
+  }
   function debounce(fn,ms){ var t; return function(){ clearTimeout(t); var a=arguments,c=this; t=setTimeout(function(){fn.apply(c,a);},ms); }; }
 
   function parseList(text){
@@ -812,11 +885,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
 
   function cleanCell(value, words, opts){
-    if(typeof value !== "string"){
-      if(value===null || value===undefined) return {value:value, changed:false};
-      return {value:value, changed:false};
-    }
-    var out=value;
+    if(value===null || value===undefined) return {value:value, changed:false};
+    if(typeof value!=="string" && typeof value!=="number") return {value:value, changed:false};
+    var orig=String(value);
+    var out=orig;
     var flags = opts.caseSens ? "g" : "gi";
     for(var i=0;i<words.length;i++){
       var w=words[i]; if(!w) continue;
@@ -829,7 +901,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       out=out.replace(/[ \t]{2,}/g," ").replace(/ +([,.;:])/g,"$1");
     }
     out=out.replace(/^\s+|\s+$/g,"");
-    return {value:out, changed: out!==value};
+    if(out===orig) return {value:value, changed:false}; // unchanged -> keep original type
+    return {value:out, changed:true};
   }
 
   function isBlank(v){
@@ -933,13 +1006,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       for(var j=0;j<state.ncols;j++){
         var orig = (j<src.length)? src[j] : "";
         var cur = orig;
-        if(anyColSelected && sel[j] && words.length){
+        if(words.length && (anyColSelected ? sel[j] : true)){
           cur = cleanCell(cur, words, opts).value;
         }
         if(doReplace && inReplaceCols(j)){
           cur = applyReplaceSimple(cur, findTerm, replTerm);
         }
-        if(addActive && anyAddCol && addSel[j]){
+        if(addActive && (anyAddCol ? addSel[j] : true)){
           cur = applyAdd(cur, addOpts);
         }
         cleanedRow[j]=cur;
@@ -1028,7 +1101,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   // ---------- rendering ----------
   function renderColChips(){
-    var names=headerNames();
+    var names=uiHeaderNames();
     colChips.innerHTML="";
     for(var j=0;j<state.ncols;j++){
       (function(idx,label){
@@ -1047,7 +1120,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
 
   function renderReplaceColChips(){
-    var names=headerNames();
+    var names=uiHeaderNames();
     replaceColChips.innerHTML="";
     for(var j=0;j<state.ncols;j++){
       (function(idx,label){
@@ -1065,7 +1138,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
 
   function renderAddColChips(){
-    var names=headerNames();
+    var names=uiHeaderNames();
     addColChips.innerHTML="";
     for(var j=0;j<state.ncols;j++){
       (function(idx,label){
@@ -1084,7 +1157,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
 
   function renderRowColChips(){
-    var names=headerNames();
+    var names=uiHeaderNames();
     rowColChips.innerHTML="";
     for(var j=0;j<state.ncols;j++){
       (function(idx,label){
@@ -1108,7 +1181,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
 
   function renderTable(res){
-    var names=headerNames();
+    var names=uiHeaderNames();
     var rows=res.cleaned;
     var hlFindTerm=rFind.value, hlReplTerm=rTo.value;
     var hlTerm = (hlFindTerm && hlReplTerm) ? hlReplTerm : hlFindTerm;
@@ -1125,7 +1198,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       '<th class="rownum-h">#</th>',
       '<th class="del-col" title="סמן למחיקה">✕</th>'];
     for(var j=0;j<state.ncols;j++){
-      html.push('<th class="'+(state.dropCols[j]?'col-dropped':'')+'">'+escHtml(names[j])+'</th>');
+      html.push('<th class="'+(state.dropCols[j]?'col-dropped':'')+(hasHeader.checked?' editable-h':'')+'" '+(hasHeader.checked?('data-h="'+j+'"'):'')+'>'+escHtml(names[j])+'</th>');
     }
     if(vlkActive){ for(var vh=0;vh<vNames.length;vh++) html.push('<th class="vlk-col">'+escHtml(vNames[vh])+'</th>'); }
     html.push('</tr></thead><tbody>');
@@ -1147,7 +1220,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           cellTxt = highlightTermInEsc(cellTxt, hlTerm);
         }
         var dot = (changed[c] && !state.dropCols[c]) ? '<span class="changed-tag" title="שונה"></span>' : '';
-        html.push('<td class="'+cls.join(" ")+'" title="'+escAttr(v)+'">'+cellTxt+dot+'</td>');
+        html.push('<td class="'+cls.join(" ")+' editable" data-r="'+r+'" data-c="'+c+'" title="'+escAttr(v)+'">'+cellTxt+dot+'</td>');
       }
       if(vlkActive){
         var vv=vlkValuesFor(rows[r][vMainKey], vMap, vBring);
@@ -1156,6 +1229,17 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           html.push('<td class="vlk-col'+(vt===""?" empty-cell":"")+'" title="'+escAttr(vt)+'">'+(vt===""?"—":escHtml(vt))+'</td>');
         }
       }
+      html.push('</tr>');
+    }
+    var prevTotal=sumTotalRowOrNull();
+    if(prevTotal){
+      html.push('<tr style="background:#eef6f4;font-weight:800">');
+      html.push('<td class="rownum">Σ</td><td class="del-col"></td>');
+      for(var tc=0;tc<state.ncols;tc++){
+        var tv=fmt(prevTotal[tc]);
+        html.push('<td class="'+(state.dropCols[tc]?'col-dropped':'')+'">'+(tv===""?"":escHtml(tv))+'</td>');
+      }
+      if(vlkActive){ for(var tvk=0;tvk<vNames.length;tvk++) html.push('<td class="vlk-col"></td>'); }
       html.push('</tr>');
     }
     html.push('</tbody></table>');
@@ -1214,15 +1298,20 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   function refresh(){
     if(!state.aoa.length) return;
     var res=compute();
-    if(isPivotActive()){
+    var mode=activeViewMode();
+    if(mode==="pivot"){
       renderSummary(res, null);
       renderPivotTable(computePivot(survivingRows(res)));
       return;
     }
-    var cons = isConsolidating() ? consolidateRows(survivingRows(res)) : null;
-    renderSummary(res, cons);
-    if(cons) renderConsolidatedTable(cons);
-    else renderTable(res);
+    if(mode==="consolidate"){
+      var cons=consolidateRows(survivingRows(res));
+      renderSummary(res, cons);
+      renderConsolidatedTable(cons);
+      return;
+    }
+    renderSummary(res, null);
+    renderTable(res);
   }
 
   function renderPivotTable(piv){
@@ -1244,7 +1333,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
 
   function renderDropColChips(){
-    var names=headerNames();
+    var names=uiHeaderNames();
     dropColChips.innerHTML="";
     for(var j=0;j<state.ncols;j++){
       (function(idx,label){
@@ -1294,10 +1383,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     if(keepValue && cur!=="" && parseInt(cur,10)<names.length) sel.value=cur;
   }
   function populateMainSelects(){
-    var names=headerNames();
+    var names=uiHeaderNames();
     fillSelect(vlkMainKey, names, true);
     fillSelect(pivotGroup, names, true);
     fillSelect(pivotVal, names, true);
+    fillSelect(sumCol, names, true);
+    if(sumResult) sumResult.hidden=true;
   }
 
   // ---- VLOOKUP second-file loading ----
@@ -1308,7 +1399,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     var LIMIT=8, shown=Math.min(rows.length, LIMIT);
     var html=['<table><thead><tr>'];
     for(var j=0;j<headers.length;j++){
-      html.push('<th class="'+(j===sk?'keycol':'')+'">'+escHtml(headers[j])+(j===sk?' 🔑':'')+'</th>');
+      html.push('<th class="'+(j===sk?'keycol':'')+'">'+escHtml(vlkColLabel(j))+(j===sk?' 🔑':'')+'</th>');
     }
     html.push('</tr></thead><tbody>');
     for(var r=0;r<shown;r++){
@@ -1326,6 +1417,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     prev.innerHTML=html.join("");
   }
 
+  function vlkColLabel(j){
+    var nm=state.vlk.headers[j]; if(nm===undefined||nm===null||String(nm).trim()==="") nm="עמודה "+colLabel(j);
+    return colLabel(j)+" · "+nm;
+  }
+
   function renderVlkBringChips(){
     vlkBringChips.innerHTML="";
     for(var j=0;j<state.vlk.headers.length;j++){
@@ -1340,13 +1436,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           refresh();
         });
         vlkBringChips.appendChild(b);
-      })(j, state.vlk.headers[j]||("עמודה "+(j+1)));
+      })(j, vlkColLabel(j));
     }
   }
   function populateVlkSrcKey(){
     vlkSrcKey.innerHTML="";
     for(var j=0;j<state.vlk.headers.length;j++){
-      var o=document.createElement("option"); o.value=String(j); o.textContent=state.vlk.headers[j]||("עמודה "+(j+1)); vlkSrcKey.appendChild(o);
+      var o=document.createElement("option"); o.value=String(j); o.textContent=vlkColLabel(j); vlkSrcKey.appendChild(o);
     }
     vlkSrcKey.value=String(state.vlk.srcKey);
   }
@@ -1439,7 +1535,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     return "first";
   }
   function renderConsolidation(){
-    var names=headerNames();
+    var names=uiHeaderNames();
     var prev=state.keyCol;
     keyCol.innerHTML="";
     for(var j=0;j<state.ncols;j++){
@@ -1450,7 +1546,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     renderAggList();
   }
   function renderAggList(){
-    var names=headerNames();
+    var names=uiHeaderNames();
     aggList.innerHTML="";
     for(var j=0;j<state.ncols;j++){
       (function(idx,label){
@@ -1476,7 +1572,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
 
   function renderConsolidatedTable(cons){
-    var names=headerNames();
+    var names=uiHeaderNames();
     var cols=[]; for(var j=0;j<state.ncols;j++){ if(!state.dropCols[j]) cols.push(j); }
     var total=cons.rows.length, shown=Math.min(total, PREVIEW_LIMIT);
     var html=['<table><thead><tr>','<th class="rownum-h">#</th>'];
@@ -1673,6 +1769,123 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     return out;
   }
 
+  // ---------- Sum a column ("חיבור") ----------
+  function computeColumnSum(){
+    var res=state.computed || compute();
+    var col=parseInt(sumCol.value,10);
+    if(isNaN(col)){ return null; }
+    var sum=0, numCount=0, skipped=0, total=0;
+    for(var r=0;r<res.cleaned.length;r++){
+      if(res.deleted[r]) continue;
+      total++;
+      var raw=valStr(res.cleaned[r][col]).trim();
+      if(raw===""){ continue; }
+      var n=Number(raw.replace(/,/g,""));
+      if(!isNaN(n)){ sum+=n; numCount++; }
+      else { skipped++; }
+    }
+    var names=uiHeaderNames();
+    return { sum:sum, numCount:numCount, skipped:skipped, total:total, name:names[col]||"" };
+  }
+  function omitHeaderInOutput(){ return hasHeader.checked && dropHeaderRow.checked; }
+
+  // ---- smart deletion suggestions ----
+  function computeSuggestions(){
+    var res=state.computed || compute();
+    var dropCols=state.dropCols, seen={}, sugg=[];
+    for(var r=0;r<res.cleaned.length;r++){
+      if(res.deleted[r]) continue; // already slated for deletion
+      var row=res.cleaned[r], filled=0, keyParts=[];
+      for(var c=0;c<state.ncols;c++){
+        if(dropCols[c]) continue;
+        var v=valStr(row[c]).trim();
+        keyParts.push(v);
+        if(v!=="") filled++;
+      }
+      var totalCols=keyParts.length, key=keyParts.join("\u0001"), reason=null;
+      if(filled===0) reason="שורה ריקה לגמרי";
+      else if(seen[key]!==undefined) reason="כפילות של שורה "+(seen[key]+1);
+      else if(totalCols>=3 && filled===1) reason="כמעט ריקה (רק תא אחד מלא)";
+      if(seen[key]===undefined) seen[key]=r;
+      if(reason){
+        var prev=[];
+        for(var pc=0;pc<state.ncols;pc++){ if(dropCols[pc]) continue; var pv=valStr(row[pc]).trim(); if(pv!=="") prev.push(pv); }
+        sugg.push({ r:r, reason:reason, preview: prev.length?prev.join(" | "):"(ריק)" });
+      }
+    }
+    return sugg;
+  }
+
+  function renderSuggestions(){
+    var box=$("suggestResults");
+    var sugg=computeSuggestions();
+    if(!sugg.length){
+      box.innerHTML='<div class="suggest-none">✓ לא נמצאו שורות מומלצות למחיקה — הנתונים נראים נקיים!</div>';
+      return;
+    }
+    var html=['<div class="suggest-summary">נמצאו '+sugg.length+' שורות מומלצות למחיקה:</div>',
+      '<button class="mini si-all" id="suggDeleteAll">מחק את כל ה‑'+sugg.length+' המוצעות</button>'];
+    for(var i=0;i<sugg.length;i++){
+      var s=sugg[i];
+      html.push('<div class="suggest-item" data-r="'+s.r+'">'+
+        '<span class="si-reason">'+escHtml(s.reason)+'</span>'+
+        '<span class="si-preview" title="'+escAttr(s.preview)+'">שורה '+(s.r+1)+': '+escHtml(s.preview)+'</span>'+
+        '<span class="si-actions">'+
+          '<button class="si-del" data-r="'+s.r+'">מחק</button>'+
+          '<button class="si-keep" data-r="'+s.r+'">השאר</button>'+
+        '</span></div>');
+    }
+    box.innerHTML=html.join("");
+    function finishIfEmpty(){
+      if(!box.querySelector(".suggest-item")){ box.innerHTML='<div class="suggest-none">✓ סיימת לעבור על ההצעות.</div>'; }
+    }
+    var dels=box.querySelectorAll(".si-del");
+    for(var d=0;d<dels.length;d++){
+      dels[d].addEventListener("click",function(e){
+        var r=parseInt(e.currentTarget.getAttribute("data-r"),10);
+        state.manualDeleted[r]=true; refresh();
+        var it=e.currentTarget.closest(".suggest-item"); if(it) it.remove();
+        finishIfEmpty();
+      });
+    }
+    var keeps=box.querySelectorAll(".si-keep");
+    for(var k=0;k<keeps.length;k++){
+      keeps[k].addEventListener("click",function(e){
+        var it=e.currentTarget.closest(".suggest-item"); if(it) it.remove();
+        finishIfEmpty();
+      });
+    }
+    var all=$("suggDeleteAll");
+    if(all) all.addEventListener("click",function(){
+      var items=box.querySelectorAll(".suggest-item");
+      for(var x=0;x<items.length;x++){ state.manualDeleted[parseInt(items[x].getAttribute("data-r"),10)]=true; }
+      refresh(); renderSuggestions();
+    });
+  }
+  function sumTotalRowOrNull(){
+    if(!sumInOutput.checked) return null;
+    var r=computeColumnSum();
+    if(!r) return null;
+    var col=parseInt(sumCol.value,10);
+    if(isNaN(col)) return null;
+    var row=new Array(state.ncols);
+    for(var i=0;i<state.ncols;i++) row[i]="";
+    row[col]=r.sum;
+    return row;
+  }
+
+  function showColumnSum(){
+    var r=computeColumnSum();
+    if(!r){ sumResult.hidden=true; return; }
+    var html='<div class="sum-label">סכום העמודה "'+escHtml(r.name)+'":</div>'+
+      '<div class="sum-big">'+r.sum.toLocaleString("he-IL",{maximumFractionDigits:2})+'</div>'+
+      '<div class="sum-meta">חוברו '+r.numCount.toLocaleString("he-IL")+' ערכים מספריים מתוך '+r.total.toLocaleString("he-IL")+' שורות.';
+    if(r.skipped>0) html+='<br>'+r.skipped.toLocaleString("he-IL")+' תאים דולגו (לא מספריים).';
+    html+='</div>';
+    sumResult.innerHTML=html;
+    sumResult.hidden=false;
+  }
+
   // ---------- Pivot ----------
   function isPivotActive(){
     return pivotOn.checked && pivotGroup.value!=="" && parseInt(pivotGroup.value,10)<state.ncols;
@@ -1704,8 +1917,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   function buildOutputAoa(){
     var res=state.computed || compute();
+    var mode=activeViewMode();
 
-    if(isPivotActive()){
+    if(mode==="pivot"){
       var piv=computePivot(survivingRows(res));
       var po=[[piv.groupName, piv.resultName]];
       for(var pi=0;pi<piv.rows.length;pi++){ po.push([piv.rows[pi][0], piv.rows[pi][1]]); }
@@ -1713,7 +1927,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       return po;
     }
 
-    if(isConsolidating()){
+    if(mode==="consolidate"){
       var cons=consolidateRows(survivingRows(res));
       var out=[];
       if(hasHeader.checked && state.aoa.length){
@@ -1735,7 +1949,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     if(vlkActive){ vMap=vlkBuildMap(); vBring=vlkBringList(); vNames=vlkHeaderNames(); vMainKey=parseInt(vlkMainKey.value,10); }
 
     var out2=[];
-    if(hasHeader.checked && state.aoa.length){
+    if(hasHeader.checked && !omitHeaderInOutput() && state.aoa.length){
       var h2=dropFilter(state.aoa[0].slice(0,state.ncols));
       if(vlkActive){ for(var vh=0;vh<vNames.length;vh++) h2.push(vNames[vh]); }
       out2.push(h2);
@@ -1748,6 +1962,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         for(var vc=0;vc<vv.length;vc++) orow.push(vv[vc]);
       }
       out2.push(orow);
+    }
+    var totalRow=sumTotalRowOrNull();
+    if(totalRow){
+      var trow=dropFilter(totalRow);
+      if(vlkActive){ for(var vt=0;vt<vNames.length;vt++) trow.push(""); }
+      out2.push(trow);
     }
     return out2;
   }
@@ -1804,7 +2024,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         for(var p=0;p<panes.length;p++) panes[p].classList.remove("show");
         var pane=document.getElementById(target);
         if(pane) pane.classList.add("show");
+        activePane = target;
         if(panelScroll) panelScroll.scrollTop=0;
+        refresh();
       });
     }
   })();
@@ -1817,7 +2039,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     pivotOn.checked=false; pivotBody.hidden=true; pivotValWrap.hidden=true;
   });
 
-  hasHeader.addEventListener("change",function(){ rebuildColumnUI(); refresh(); });
+  hasHeader.addEventListener("change",function(){ dropHeaderWrap.hidden=!hasHeader.checked; rebuildColumnUI(); refresh(); });
 
   selAll.addEventListener("click",function(){
     for(var j=0;j<state.ncols;j++) state.selectedCols[j]=true;
@@ -1912,6 +2134,71 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     refresh();
   });
   pivotVal.addEventListener("change",refresh);
+
+  // חיבור (sum a column)
+  sumBtn.addEventListener("click",showColumnSum);
+  sumCol.addEventListener("change",function(){ sumResult.hidden=true; refresh(); });
+  sumInOutput.addEventListener("change",refresh);
+  dropHeaderRow.addEventListener("change",refresh);
+  $("suggestBtn").addEventListener("click",renderSuggestions);
+
+  // ---- inline cell editing ----
+  function aoaRowFor(r){ return r + (hasHeader.checked ? 1 : 0); }
+  function coerceCellValue(val){
+    var t=val.trim();
+    if(t!=="" && /^-?\d+(\.\d+)?$/.test(t) && !/^0\d/.test(t)) return Number(t);
+    return val;
+  }
+  function startCellEdit(cell){
+    if(cell.querySelector("input.cell-edit")) return;
+    var isHeader=cell.hasAttribute("data-h"), raw, save;
+    if(isHeader){
+      var hc=parseInt(cell.getAttribute("data-h"),10);
+      raw=(state.aoa[0] && state.aoa[0][hc]!=null) ? String(state.aoa[0][hc]) : "";
+      save=function(val){ if(!state.aoa[0]) state.aoa[0]=[]; state.aoa[0][hc]=val; rebuildColumnUI(); refresh(); };
+    } else {
+      var rr=parseInt(cell.getAttribute("data-r"),10), cc=parseInt(cell.getAttribute("data-c"),10);
+      var ar=aoaRowFor(rr);
+      raw=(state.aoa[ar] && state.aoa[ar][cc]!=null) ? String(state.aoa[ar][cc]) : "";
+      save=function(val){ if(!state.aoa[ar]) state.aoa[ar]=[]; state.aoa[ar][cc]=coerceCellValue(val); refresh(); };
+    }
+    var input=document.createElement("input");
+    input.type="text"; input.className="cell-edit"; input.value=raw;
+    cell.innerHTML=""; cell.appendChild(input);
+    input.focus(); try{ input.select(); }catch(e){}
+    var done=false;
+    function commit(){ if(done) return; done=true; save(input.value); }
+    function cancelEdit(){ if(done) return; done=true; refresh(); }
+    input.addEventListener("blur", commit);
+    input.addEventListener("keydown", function(e){
+      if(e.key==="Enter"){ e.preventDefault(); commit(); }
+      else if(e.key==="Escape"){ e.preventDefault(); cancelEdit(); }
+    });
+  }
+  tablewrap.addEventListener("click", function(e){
+    var cell=e.target.closest("td.editable, th.editable-h");
+    if(cell && tablewrap.contains(cell)) startCellEdit(cell);
+  });
+
+  // ---- add a new empty row ----
+  var addRowBtn=$("addRowBtn");
+  addRowBtn.addEventListener("click", function(){
+    if(!state.aoa.length) return;
+    var row=new Array(state.ncols);
+    for(var i=0;i<state.ncols;i++) row[i]="";
+    state.aoa.push(row);
+    state.computed=null;
+    refresh();
+    // focus the first cell of the new (last) row, if rendered
+    var lastDataIndex = state.aoa.length - 1 - (hasHeader.checked ? 1 : 0);
+    var newCell=tablewrap.querySelector('td.editable[data-r="'+lastDataIndex+'"][data-c="0"]');
+    if(newCell){
+      try{ newCell.scrollIntoView({block:"center"}); }catch(e){}
+      startCellEdit(newCell);
+    } else {
+      tablewrap.scrollTop=tablewrap.scrollHeight;
+    }
+  });
   keyCol.addEventListener("change",function(e){
     state.keyCol=parseInt(e.target.value,10);
     renderAggList();
@@ -1939,6 +2226,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     state.aggMethods={}; state.keyCol=null; addCount.checked=true; joinSep.value=", ";
     state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}, source:"same"}; vlkBody.hidden=true; vlkStatus.textContent=""; vlkFileActions.hidden=true; vlkPick.hidden=false;
     pivotOn.checked=false; pivotBody.hidden=true; pivotAgg.value="count"; pivotValWrap.hidden=true;
+    sumInOutput.checked=false; sumResult.hidden=true; dropHeaderRow.checked=false;
     rebuildColumnUI(); refresh();
   });
 
