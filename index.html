@@ -154,6 +154,18 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   .pcard{padding:18px 18px;border-bottom:1px solid var(--line-soft);}
   .pcard:last-child{border-bottom:none;}
+
+  /* panel action tabs */
+  .ptabs{display:flex;flex-wrap:wrap;gap:6px;padding:14px 16px 12px;border-bottom:1px solid var(--line);background:#f6f8f7;}
+  .ptab{
+    border:1px solid var(--line);background:#fff;border-radius:999px;
+    padding:7px 12px;font-size:12.5px;font-weight:700;color:var(--muted);
+    transition:background .12s, color .12s, border-color .12s;
+  }
+  .ptab:hover{border-color:var(--teal);color:var(--teal-deep);}
+  .ptab.active{background:var(--teal);border-color:var(--teal);color:#fff;}
+  .pane{display:none;}
+  .pane.show{display:block;}
   .pcard h4{
     margin:0 0 4px;font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px;
   }
@@ -404,7 +416,17 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             </label>
           </div>
 
-          <div class="pcard">
+          <div class="ptabs" id="ptabs">
+            <button class="ptab active" data-pane="pane1">עמודות לעריכה</button>
+            <button class="ptab" data-pane="pane2">מילים למחיקה</button>
+            <button class="ptab" data-pane="pane3">חיפוש והחלפה</button>
+            <button class="ptab" data-pane="pane4">הוספת טקסט</button>
+            <button class="ptab" data-pane="pane5">מחיקת עמודות</button>
+            <button class="ptab" data-pane="pane6">מחיקת שורות</button>
+            <button class="ptab" data-pane="pane7">איחוד רשומות</button>
+          </div>
+
+          <div class="pcard pane show" id="pane1">
             <h4><span class="step">1</span> עמודות לעריכה</h4>
             <p class="sub">העמודות שבהן יחולו מחיקת מילים והחלפות (שלבים 2–3). אם לא נבחרה אף עמודה — לא יחול דבר.</p>
             <div class="chip-tools">
@@ -414,7 +436,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <div class="chips" id="colChips"></div>
           </div>
 
-          <div class="pcard">
+          <div class="pcard pane" id="pane2">
             <h4><span class="step">2</span> מילים למחיקה</h4>
             <p class="sub">כל מילה או ביטוי בשורה נפרדת (או מופרדים בפסיקים). הם יוסרו מהתאים בעמודות שבחרתם.</p>
             <textarea id="wordsInput" placeholder="לדוגמה:&#10;לא רלוונטי&#10;זמני&#10;***"></textarea>
@@ -430,13 +452,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <label class="opt"><input type="checkbox" id="collapse" checked> צמצם רווחים כפולים אחרי הניקוי</label>
           </div>
 
-          <div class="pcard">
+          <div class="pcard pane" id="pane3">
             <h4><span class="step">3</span> חיפוש והחלפה</h4>
             <p class="sub">החליפו מילה או ביטוי באחר בעמודות לעריכה. שורה לכל החלפה בתבנית <code>מקור =&gt; חלופה</code>. משתמש באותן אפשרויות התאמה של שלב 2 (מיקום, מילים שלמות, אותיות).</p>
             <textarea id="replacePairs" placeholder="לדוגמה:&#10;זמני =&gt; קבוע&#10;OUT =&gt; IN"></textarea>
           </div>
 
-          <div class="pcard">
+          <div class="pcard pane" id="pane4">
             <h4><span class="step">4</span> הוספת טקסט</h4>
             <p class="sub">הוסיפו מילה או משפט לתאים בעמודות שתבחרו — בתחילת התא או בסופו.</p>
 
@@ -461,7 +483,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <label class="opt"><input type="checkbox" id="addSkipPresent" checked> אל תוסיף אם הטקסט כבר קיים בתא</label>
           </div>
 
-          <div class="pcard">
+          <div class="pcard pane" id="pane5">
             <h4><span class="step">5</span> מחיקת עמודות</h4>
             <p class="sub">בחרו עמודות שיוסרו לגמרי מהקובץ המיוצא. בתצוגה הן יופיעו עם קו חוצה.</p>
             <div class="chip-tools">
@@ -471,7 +493,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <div class="chips" id="dropColChips"></div>
           </div>
 
-          <div class="pcard">
+          <div class="pcard pane" id="pane6">
             <h4><span class="step">6</span> מחיקת שורות</h4>
             <p class="sub">הגדירו מתי למחוק שורה שלמה. אפשר לשלב כמה כללים.</p>
 
@@ -501,7 +523,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <button class="mini" id="clearManual" style="margin-top:6px" hidden>בטל סימון ידני (<span id="manualCount">0</span>)</button>
           </div>
 
-          <div class="pcard">
+          <div class="pcard pane" id="pane7">
             <h4><span class="step">7</span> איחוד רשומות כפולות</h4>
             <p class="sub">בחרו עמודת מפתח לזיהוי כפילויות. אפשר לסמן אותן באדום בהיר, ולאחד אותן לשורה אחת.</p>
 
@@ -1327,6 +1349,25 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     e.preventDefault(); dropzone.classList.remove("drag");
     if(e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
   });
+
+  // panel action tabs
+  (function(){
+    var tabs=document.querySelectorAll(".ptab");
+    var panelScroll=document.querySelector(".panel-scroll");
+    for(var i=0;i<tabs.length;i++){
+      tabs[i].addEventListener("click",function(e){
+        var target=e.currentTarget.getAttribute("data-pane");
+        var all=document.querySelectorAll(".ptab");
+        for(var k=0;k<all.length;k++) all[k].classList.remove("active");
+        e.currentTarget.classList.add("active");
+        var panes=document.querySelectorAll(".pane");
+        for(var p=0;p<panes.length;p++) panes[p].classList.remove("show");
+        var pane=document.getElementById(target);
+        if(pane) pane.classList.add("show");
+        if(panelScroll) panelScroll.scrollTop=0;
+      });
+    }
+  })();
 
   resetBtn.addEventListener("click",function(){
     appView.hidden=true; uploadView.hidden=false; resetBtn.hidden=true;
