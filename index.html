@@ -291,6 +291,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   td.del-col input{accent-color:var(--coral);width:16px;height:16px;cursor:pointer;}
   td.changed{background:var(--teal-soft);}
   tr:hover td.changed{background:#cdeae4;}
+  .hl-find{background:#FFD3D0;color:#B3261E;border-radius:3px;padding:0 2px;font-weight:800;}
   td.empty-cell{color:#b6c0bc;font-style:italic;}
   tr.dup td{ background:#FFE3E1; }
   tr.dup:hover td{ background:#FBD3D0; }
@@ -435,7 +436,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
           <div class="pcard pane show" id="pane1">
             <h4><span class="step">1</span> עמודות לעריכה</h4>
-            <p class="sub">העמודות שבהן יחולו מחיקת מילים והחלפות (שלבים 2–3). אם לא נבחרה אף עמודה — לא יחול דבר.</p>
+            <p class="sub">העמודות שבהן יחולו מחיקת המילים (שלב 2). חיפוש והחלפה (שלב 3) בוחר עמודות בעצמו.</p>
             <div class="chip-tools">
               <button class="mini" id="selAll">בחר הכול</button>
               <button class="mini" id="selNone">נקה בחירה</button>
@@ -461,8 +462,21 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
           <div class="pcard pane" id="pane3">
             <h4><span class="step">3</span> חיפוש והחלפה</h4>
-            <p class="sub">החליפו מילה או ביטוי באחר בעמודות לעריכה. שורה לכל החלפה בתבנית <code>מקור =&gt; חלופה</code>. משתמש באותן אפשרויות התאמה של שלב 2 (מיקום, מילים שלמות, אותיות).</p>
-            <textarea id="replacePairs" placeholder="לדוגמה:&#10;זמני =&gt; קבוע&#10;OUT =&gt; IN"></textarea>
+            <p class="sub">מצאו מילה — היא תסומן באדום בתצוגה — והחליפו אותה במילה אחרת.</p>
+
+            <label class="field-label" style="margin-top:0">מצא (המילה לחיפוש):</label>
+            <input type="text" id="rFind" placeholder="למשל: זמני">
+
+            <label class="field-label">החלף ב:</label>
+            <input type="text" id="rTo" placeholder="למשל: קבוע (אפשר להשאיר ריק)">
+
+            <label class="field-label">באילו עמודות לחפש?</label>
+            <div class="chip-tools">
+              <button class="mini" id="repSelAll">בחר הכול</button>
+              <button class="mini" id="repSelNone">כל העמודות</button>
+            </div>
+            <div class="chips" id="replaceColChips"></div>
+            <p class="sub" style="margin:8px 0 0">אם לא נבחרה אף עמודה — החיפוש יתבצע בכל העמודות.</p>
           </div>
 
           <div class="pcard pane" id="pane4">
@@ -604,6 +618,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     fileName:"clean",
     selectedCols:{},   // colIndex -> bool (for word cleaning)
     addCols:{},        // colIndex -> bool (for text addition)
+    replaceCols:{},    // colIndex -> bool (for find & replace)
     dropCols:{},       // colIndex -> bool (columns to remove from output)
     rowCols:{},        // colIndex -> bool (columns to check for row-deletion values)
     aggMethods:{},     // colIndex -> aggregation method for consolidation
@@ -624,7 +639,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var wordsInput=$("wordsInput"), wholeWord=$("wholeWord"), caseSens=$("caseSens"), collapse=$("collapse"), matchPos=$("matchPos");
   var addTextInput=$("addText"), addPos=$("addPos"), addColChips=$("addColChips"), addSelAll=$("addSelAll"), addSelNone=$("addSelNone");
   var addSep=$("addSep"), addSkipEmpty=$("addSkipEmpty"), addSkipPresent=$("addSkipPresent");
-  var replacePairs=$("replacePairs");
+  var rFind=$("rFind"), rTo=$("rTo"), replaceColChips=$("replaceColChips"), repSelAll=$("repSelAll"), repSelNone=$("repSelNone");
   var dropColChips=$("dropColChips"), dropSelAll=$("dropSelAll"), dropSelNone=$("dropSelNone");
   var dedupe=$("dedupe"), statCols=$("statCols"), resetSettings=$("resetSettings");
   var consolidateOn=$("consolidateOn"), consolidateBody=$("consolidateBody"), keyCol=$("keyCol");
@@ -719,27 +734,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     return (o.pos==="start") ? (o.text+sep+s) : (s+sep+o.text);
   }
 
-  function parsePairs(text){
-    if(!text) return [];
-    return text.split(/\n/).map(function(l){
-      var i=l.indexOf("=>"); if(i===-1) i=l.indexOf("->");
-      if(i===-1) return null;
-      var from=l.slice(0,i).trim(), to=l.slice(i+2).trim();
-      return from ? {from:from, to:to} : null;
-    }).filter(function(p){return p;});
-  }
-
-  function applyReplaces(value, pairs, opts){
-    if(typeof value !== "string") return value;
-    var out=value, flags=opts.caseSens ? "g" : "gi";
-    for(var i=0;i<pairs.length;i++){
-      var p=pairs[i];
-      try{
-        var re=new RegExp(buildPattern(p.from, opts.pos, opts.wholeWord), flags);
-        out=out.replace(re, function(){ return p.to; });
-      }catch(e){ /* skip invalid */ }
-    }
-    return out;
+  function applyReplaceSimple(value, find, repl){
+    if(typeof value !== "string" || !find) return value;
+    try{
+      var re=new RegExp(escapeRegExp(find), "gi");
+      return value.replace(re, function(){ return repl; });
+    }catch(e){ return value; }
   }
 
   // ---------- compute ----------
@@ -769,9 +769,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       skipPresent: addSkipPresent.checked
     };
 
-    // find & replace setup (shares edit columns + matching options)
-    var pairs=parsePairs(replacePairs.value);
-    var replaceActive = pairs.length>0;
+    // find & replace setup (own columns)
+    var findTerm=rFind.value;
+    var replTerm=rTo.value;
+    var doReplace = findTerm.length>0 && replTerm.length>0;  // apply only when replacement provided
+    var repCols=state.replaceCols;
+    var repColList=[];
+    for(var rpc=0;rpc<state.ncols;rpc++){ if(repCols[rpc]) repColList.push(rpc); }
+    var repAllCols = repColList.length===0;
+    function inReplaceCols(j){ return repAllCols || repCols[j]; }
 
     // dropped columns
     var dropCols=state.dropCols;
@@ -813,9 +819,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       for(var j=0;j<state.ncols;j++){
         var orig = (j<src.length)? src[j] : "";
         var cur = orig;
-        if(anyColSelected && sel[j]){
-          if(words.length) cur = cleanCell(cur, words, opts).value;
-          if(replaceActive) cur = applyReplaces(cur, pairs, opts);
+        if(anyColSelected && sel[j] && words.length){
+          cur = cleanCell(cur, words, opts).value;
+        }
+        if(doReplace && inReplaceCols(j)){
+          cur = applyReplaceSimple(cur, findTerm, replTerm);
         }
         if(addActive && anyAddCol && addSel[j]){
           cur = applyAdd(cur, addOpts);
@@ -924,6 +932,24 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     }
   }
 
+  function renderReplaceColChips(){
+    var names=headerNames();
+    replaceColChips.innerHTML="";
+    for(var j=0;j<state.ncols;j++){
+      (function(idx,label){
+        var b=document.createElement("button");
+        b.className="chip"+(state.replaceCols[idx]?" on":"");
+        b.textContent=label; b.title=label;
+        b.addEventListener("click",function(){
+          state.replaceCols[idx]=!state.replaceCols[idx];
+          b.classList.toggle("on", state.replaceCols[idx]);
+          refresh();
+        });
+        replaceColChips.appendChild(b);
+      })(j, names[j]);
+    }
+  }
+
   function renderAddColChips(){
     var names=headerNames();
     addColChips.innerHTML="";
@@ -970,6 +996,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   function renderTable(res){
     var names=headerNames();
     var rows=res.cleaned;
+    var hlFindTerm=rFind.value, hlReplTerm=rTo.value;
+    var hlTerm = (hlFindTerm && hlReplTerm) ? hlReplTerm : hlFindTerm;
+    var hlRepCols=state.replaceCols, hlRepAny=false;
+    for(var hk in hlRepCols){ if(hlRepCols[hk]){ hlRepAny=true; break; } }
     var total=rows.length;
     var shown=Math.min(total, PREVIEW_LIMIT);
 
@@ -994,6 +1024,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         if(changed[c]) cls.push("changed");
         if(v==="") { cls.push("empty-cell"); }
         var cellTxt = v===""? "—" : escHtml(v);
+        if(hlTerm && v!=="" && !state.dropCols[c] && (!hlRepAny || hlRepCols[c])){
+          cellTxt = highlightTermInEsc(cellTxt, hlTerm);
+        }
         var dot = (changed[c] && !state.dropCols[c]) ? '<span class="changed-tag" title="שונה"></span>' : '';
         html.push('<td class="'+cls.join(" ")+'" title="'+escAttr(v)+'">'+cellTxt+dot+'</td>');
       }
@@ -1023,6 +1056,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
   function escAttr(s){ return escHtml(s).replace(/"/g,"&quot;"); }
+
+  function highlightTermInEsc(escText, term){
+    var escTerm=escHtml(term);
+    if(!escTerm) return escText;
+    try{
+      var re=new RegExp(escapeRegExp(escTerm), "gi");
+      return escText.replace(re, function(m){ return '<span class="hl-find">'+m+'</span>'; });
+    }catch(e){ return escText; }
+  }
 
   function renderSummary(res, cons){
     var total=res.cleaned.length;
@@ -1073,6 +1115,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   function rebuildColumnUI(){
     renderColChips();
+    renderReplaceColChips();
     renderAddColChips();
     renderDropColChips();
     renderRowColChips();
@@ -1209,6 +1252,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     state.aoa=aoa;
     state.ncols=ncols;
     state.selectedCols={};
+    state.replaceCols={};
     state.addCols={};
     state.dropCols={};
     state.rowCols={};
@@ -1427,7 +1471,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   wordsInput.addEventListener("input",deb);
   rowValues.addEventListener("input",deb);
   addTextInput.addEventListener("input",deb);
-  replacePairs.addEventListener("input",deb);
+  rFind.addEventListener("input",deb);
+  rTo.addEventListener("input",deb);
+  repSelAll.addEventListener("click",function(){
+    for(var j=0;j<state.ncols;j++) state.replaceCols[j]=true;
+    renderReplaceColChips(); refresh();
+  });
+  repSelNone.addEventListener("click",function(){
+    state.replaceCols={}; renderReplaceColChips(); refresh();
+  });
   addPos.addEventListener("change",refresh);
   addSep.addEventListener("change",refresh);
   addSkipEmpty.addEventListener("change",refresh);
@@ -1457,8 +1509,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   exportCsv.addEventListener("click",exportToCsv);
 
   resetSettings.addEventListener("click",function(){
-    state.selectedCols={}; state.addCols={}; state.dropCols={}; state.rowCols={}; state.manualDeleted={};
-    wordsInput.value=""; replacePairs.value=""; rowValues.value=""; addTextInput.value="";
+    state.selectedCols={}; state.replaceCols={}; state.addCols={}; state.dropCols={}; state.rowCols={}; state.manualDeleted={};
+    wordsInput.value=""; rFind.value=""; rTo.value=""; rowValues.value=""; addTextInput.value="";
     wholeWord.checked=false; caseSens.checked=false; collapse.checked=true; matchPos.value="anywhere";
     addPos.value="end"; addSep.checked=true; addSkipEmpty.checked=true; addSkipPresent.checked=true;
     rowMatch.value="contains"; dropEmpty.checked=false; dedupe.checked=false;
