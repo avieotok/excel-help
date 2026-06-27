@@ -170,6 +170,14 @@
   .opt{display:flex;align-items:center;gap:9px;margin-top:10px;font-size:13.5px;color:var(--ink);cursor:pointer;}
   .opt input{accent-color:var(--teal);width:16px;height:16px;flex:none;cursor:pointer;}
   .field-label{display:block;font-size:12.5px;font-weight:700;color:var(--ink);margin:12px 0 6px;}
+  .agg-list{display:flex;flex-direction:column;gap:7px;}
+  .agg-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;}
+  .agg-row .agg-name{
+    font-size:13px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .agg-row select{width:auto;min-width:118px;padding:7px 10px;font-size:13px;}
+  .agg-row.is-key .agg-name{color:var(--teal-deep);font-weight:800;}
+  .agg-key-tag{font-size:11px;font-weight:700;color:var(--teal-deep);background:var(--teal-soft);border-radius:6px;padding:3px 8px;}
   .row-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 
   /* ---------- summary ---------- */
@@ -466,13 +474,32 @@
             <button class="mini" id="clearManual" style="margin-top:6px" hidden>בטל סימון ידני (<span id="manualCount">0</span>)</button>
           </div>
 
+          <div class="pcard">
+            <h4><span class="step">7</span> איחוד רשומות כפולות</h4>
+            <p class="sub">מאחד שורות בעלות אותו ערך בעמודת המפתח (למשל מק"ט) לשורה אחת — סוכם כמויות, מאחד מיקונים, ועוד.</p>
+
+            <label class="opt" style="margin-top:0"><input type="checkbox" id="consolidateOn"> הפעל איחוד רשומות</label>
+
+            <div id="consolidateBody" hidden>
+              <label class="field-label">עמודת מפתח (זיהוי כפילות):</label>
+              <select id="keyCol" aria-label="עמודת מפתח"></select>
+
+              <label class="field-label" style="margin-top:14px">איך לאחד כל עמודה:</label>
+              <div id="aggList" class="agg-list"></div>
+
+              <label class="opt" style="margin-top:12px"><input type="checkbox" id="addCount" checked> הוסף עמודה: מספר רשומות שאוחדו</label>
+              <label class="field-label" style="margin-top:10px">תו מפריד לאיחוד רשימות:</label>
+              <input type="text" id="joinSep" value=", " aria-label="תו מפריד">
+            </div>
+          </div>
+
         </div>
       </aside>
 
       <!-- main -->
       <div>
         <div class="summary" id="summary">
-          <div class="stat keep"><div class="n" id="statKeep">0</div><div class="l">שורות שיישארו</div></div>
+          <div class="stat keep"><div class="n" id="statKeep">0</div><div class="l" id="keepLabel">שורות שיישארו</div></div>
           <div class="stat del"><div class="n" id="statDel">0</div><div class="l">שורות שיימחקו</div></div>
           <div class="stat edit"><div class="n" id="statCells">0</div><div class="l">תאים שישתנו</div></div>
           <div class="stat col"><div class="n" id="statCols">0</div><div class="l">עמודות שיימחקו</div></div>
@@ -517,6 +544,8 @@
     addCols:{},        // colIndex -> bool (for text addition)
     dropCols:{},       // colIndex -> bool (columns to remove from output)
     rowCols:{},        // colIndex -> bool (columns to check for row-deletion values)
+    aggMethods:{},     // colIndex -> aggregation method for consolidation
+    keyCol:null,       // consolidation key column index
     manualDeleted:{},  // dataRowIndex -> true
     computed:null      // last compute result
   };
@@ -536,10 +565,13 @@
   var replacePairs=$("replacePairs");
   var dropColChips=$("dropColChips"), dropSelAll=$("dropSelAll"), dropSelNone=$("dropSelNone");
   var dedupe=$("dedupe"), statCols=$("statCols"), resetSettings=$("resetSettings");
+  var consolidateOn=$("consolidateOn"), consolidateBody=$("consolidateBody"), keyCol=$("keyCol");
+  var aggList=$("aggList"), addCount=$("addCount"), joinSep=$("joinSep");
   var rowValues=$("rowValues"), rowColChips=$("rowColChips"), rowMatch=$("rowMatch"), dropEmpty=$("dropEmpty");
   var rowSelAll=$("rowSelAll"), rowSelNone=$("rowSelNone");
   var clearManual=$("clearManual"), manualCount=$("manualCount");
   var statKeep=$("statKeep"), statDel=$("statDel"), statCells=$("statCells");
+  var keepLabel=$("keepLabel");
   var tablewrap=$("tablewrap"), tableEmpty=$("tableEmpty"), tableNote=$("tableNote");
   var exportXlsx=$("exportXlsx"), exportCsv=$("exportCsv");
   var refreshBtn=$("refreshBtn"), refreshLabel=$("refreshLabel");
@@ -913,9 +945,15 @@
   function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
   function escAttr(s){ return escHtml(s).replace(/"/g,"&quot;"); }
 
-  function renderSummary(res){
+  function renderSummary(res, cons){
     var total=res.cleaned.length;
-    statKeep.textContent = (total - res.rowsDeleted).toLocaleString("he-IL");
+    if(cons){
+      statKeep.textContent = cons.groups.toLocaleString("he-IL");
+      keepLabel.textContent = "רשומות לאחר איחוד";
+    } else {
+      statKeep.textContent = (total - res.rowsDeleted).toLocaleString("he-IL");
+      keepLabel.textContent = "שורות שיישארו";
+    }
     statDel.textContent  = res.rowsDeleted.toLocaleString("he-IL");
     statCells.textContent= res.cellsChanged.toLocaleString("he-IL");
     statCols.textContent = (res.droppedCols||0).toLocaleString("he-IL");
@@ -929,8 +967,10 @@
   function refresh(){
     if(!state.aoa.length) return;
     var res=compute();
-    renderSummary(res);
-    renderTable(res);
+    var cons = isConsolidating() ? consolidateRows(survivingRows(res)) : null;
+    renderSummary(res, cons);
+    if(cons) renderConsolidatedTable(cons);
+    else renderTable(res);
   }
 
   function renderDropColChips(){
@@ -957,6 +997,78 @@
     renderAddColChips();
     renderDropColChips();
     renderRowColChips();
+    renderConsolidation();
+  }
+
+  function defaultAgg(label){
+    if(/כמות|qty|quantity|amount|סכום|מלאי/i.test(label)) return "sum";
+    if(/איתור|מיקון|מיקום|location|מדף|מקום|מחסן|אזור/i.test(label)) return "joinUnique";
+    return "first";
+  }
+  function renderConsolidation(){
+    var names=headerNames();
+    var prev=state.keyCol;
+    keyCol.innerHTML="";
+    for(var j=0;j<state.ncols;j++){
+      var o=document.createElement("option"); o.value=String(j); o.textContent=names[j]; keyCol.appendChild(o);
+    }
+    if(prev===null || prev===undefined || prev>=state.ncols) state.keyCol=0;
+    keyCol.value=String(state.keyCol);
+    renderAggList();
+  }
+  function renderAggList(){
+    var names=headerNames();
+    aggList.innerHTML="";
+    for(var j=0;j<state.ncols;j++){
+      (function(idx,label){
+        var row=document.createElement("div");
+        row.className="agg-row"+(idx===state.keyCol?" is-key":"");
+        var nm=document.createElement("div"); nm.className="agg-name"; nm.textContent=label; nm.title=label;
+        row.appendChild(nm);
+        if(idx===state.keyCol){
+          var tag=document.createElement("span"); tag.className="agg-key-tag"; tag.textContent="מפתח"; row.appendChild(tag);
+        } else {
+          if(!(idx in state.aggMethods)) state.aggMethods[idx]=defaultAgg(label);
+          var sel=document.createElement("select");
+          Object.keys(AGG_LABELS).forEach(function(m){
+            var op=document.createElement("option"); op.value=m; op.textContent=AGG_LABELS[m];
+            if(state.aggMethods[idx]===m) op.selected=true; sel.appendChild(op);
+          });
+          sel.addEventListener("change",function(e){ state.aggMethods[idx]=e.target.value; refresh(); });
+          row.appendChild(sel);
+        }
+        aggList.appendChild(row);
+      })(j, names[j]);
+    }
+  }
+
+  function renderConsolidatedTable(cons){
+    var names=headerNames();
+    var cols=[]; for(var j=0;j<state.ncols;j++){ if(!state.dropCols[j]) cols.push(j); }
+    var total=cons.rows.length, shown=Math.min(total, PREVIEW_LIMIT);
+    var html=['<table><thead><tr>','<th class="rownum-h">#</th>'];
+    cols.forEach(function(j){
+      var keyMark = (j===state.keyCol) ? ' <span class="changed-tag" title="עמודת מפתח"></span>' : '';
+      html.push('<th>'+escHtml(names[j])+keyMark+'</th>');
+    });
+    if(cons.count) html.push('<th>מספר רשומות שאוחדו</th>');
+    html.push('</tr></thead><tbody>');
+    for(var r=0;r<shown;r++){
+      var item=cons.rows[r];
+      html.push('<tr><td class="rownum">'+(r+1)+'</td>');
+      cols.forEach(function(j){
+        var v=fmt(item.row[j]);
+        html.push('<td class="'+(v===""?"empty-cell":"")+'" title="'+escAttr(v)+'">'+(v===""?"—":escHtml(v))+'</td>');
+      });
+      if(cons.count) html.push('<td class="rownum">'+item.count+'</td>');
+      html.push('</tr>');
+    }
+    html.push('</tbody></table>');
+    tablewrap.innerHTML=html.join("");
+    tableNote.hidden=false;
+    var note="איחוד פעיל: "+cons.sources.toLocaleString("he-IL")+" שורות מקור אוחדו ל‑"+cons.groups.toLocaleString("he-IL")+" רשומות.";
+    if(total>shown) note+=" מוצגות "+shown+" הראשונות; הייצוא יכלול את כולן.";
+    tableNote.textContent=note;
   }
 
   // ---------- file loading ----------
@@ -1019,6 +1131,8 @@
     state.addCols={};
     state.dropCols={};
     state.rowCols={};
+    state.aggMethods={};
+    state.keyCol=null;
     state.manualDeleted={};
     rebuildColumnUI();
     refresh();
@@ -1045,17 +1159,90 @@
     return out;
   }
 
+  // ---------- consolidation (group-by) ----------
+  var AGG_LABELS={
+    first:"ראשון", sum:"סכום", avg:"ממוצע", min:"מינימום", max:"מקסימום",
+    count:"ספירה", joinUnique:"אחד (ייחודי)", joinAll:"אחד (הכול)"
+  };
+  function aggregate(values, method, sep){
+    if(method==="sum"||method==="avg"||method==="min"||method==="max"){
+      var nums=[];
+      for(var i=0;i<values.length;i++){ var t=valStr(values[i]).trim(); var n=Number(t); if(t!=="" && !isNaN(n)) nums.push(n); }
+      if(!nums.length) return "";
+      if(method==="sum") return nums.reduce(function(a,b){return a+b;},0);
+      if(method==="avg"){ var s=nums.reduce(function(a,b){return a+b;},0); return Math.round(s/nums.length*100)/100; }
+      if(method==="min") return Math.min.apply(null,nums);
+      return Math.max.apply(null,nums);
+    }
+    if(method==="count"){ var c=0; for(var k=0;k<values.length;k++){ if(valStr(values[k]).trim()!=="") c++; } return c; }
+    if(method==="joinUnique"||method==="joinAll"){
+      var seen={}, out=[];
+      for(var m=0;m<values.length;m++){ var v=valStr(values[m]).trim(); if(v==="") continue; if(method==="joinUnique"){ if(seen[v]) continue; seen[v]=1; } out.push(v); }
+      return out.join(sep);
+    }
+    for(var f=0;f<values.length;f++){ if(valStr(values[f]).trim()!=="") return values[f]; }
+    return values.length?values[0]:"";
+  }
+  function consolidateRows(rows){
+    var kc=state.keyCol, methods=state.aggMethods;
+    var sep=joinSep.value, doCount=addCount.checked;
+    var order=[], groups={};
+    for(var r=0;r<rows.length;r++){
+      var k=valStr(rows[r][kc]).trim();
+      if(k==="") k="\u0000"+r; // empty key stays separate
+      if(!(k in groups)){ groups[k]=[]; order.push(k); }
+      groups[k].push(rows[r]);
+    }
+    var outRows=[];
+    for(var o=0;o<order.length;o++){
+      var grp=groups[order[o]], rowOut=new Array(state.ncols);
+      for(var j=0;j<state.ncols;j++){
+        if(j===kc){ rowOut[j]=grp[0][j]; continue; }
+        var vals=[]; for(var g=0;g<grp.length;g++) vals.push(grp[g][j]);
+        rowOut[j]=aggregate(vals, methods[j]||"first", sep);
+      }
+      outRows.push({row:rowOut, count:grp.length});
+    }
+    return {rows:outRows, groups:order.length, sources:rows.length, count:doCount};
+  }
+  function isConsolidating(){
+    return consolidateOn.checked && state.keyCol!==null && state.keyCol!==undefined && state.keyCol<state.ncols;
+  }
+  // surviving cleaned rows (post deletion)
+  function survivingRows(res){
+    var out=[];
+    for(var r=0;r<res.cleaned.length;r++){ if(!res.deleted[r]) out.push(res.cleaned[r]); }
+    return out;
+  }
+
   function buildOutputAoa(){
     var res=state.computed || compute();
-    var out=[];
+
+    if(isConsolidating()){
+      var cons=consolidateRows(survivingRows(res));
+      var out=[];
+      if(hasHeader.checked && state.aoa.length){
+        var hdr=dropFilter(state.aoa[0].slice(0,state.ncols));
+        if(cons.count) hdr.push("מספר רשומות שאוחדו");
+        out.push(hdr);
+      }
+      for(var i=0;i<cons.rows.length;i++){
+        var row=dropFilter(cons.rows[i].row);
+        if(cons.count) row.push(cons.rows[i].count);
+        out.push(row);
+      }
+      return out;
+    }
+
+    var out2=[];
     if(hasHeader.checked && state.aoa.length){
-      out.push(dropFilter(state.aoa[0].slice(0,state.ncols)));
+      out2.push(dropFilter(state.aoa[0].slice(0,state.ncols)));
     }
     for(var r=0;r<res.cleaned.length;r++){
       if(res.deleted[r]) continue;
-      out.push(dropFilter(res.cleaned[r]));
+      out2.push(dropFilter(res.cleaned[r]));
     }
-    return out;
+    return out2;
   }
 
   function exportToXlsx(){
@@ -1146,6 +1333,18 @@
   addSkipEmpty.addEventListener("change",refresh);
   addSkipPresent.addEventListener("change",refresh);
   dedupe.addEventListener("change",refresh);
+
+  consolidateOn.addEventListener("change",function(){
+    consolidateBody.hidden = !consolidateOn.checked;
+    refresh();
+  });
+  keyCol.addEventListener("change",function(e){
+    state.keyCol=parseInt(e.target.value,10);
+    renderAggList();
+    refresh();
+  });
+  addCount.addEventListener("change",refresh);
+  joinSep.addEventListener("input",debounce(refresh,250));
   wholeWord.addEventListener("change",refresh);
   matchPos.addEventListener("change",refresh);
   caseSens.addEventListener("change",refresh);
@@ -1162,6 +1361,8 @@
     wholeWord.checked=false; caseSens.checked=false; collapse.checked=true; matchPos.value="anywhere";
     addPos.value="end"; addSep.checked=true; addSkipEmpty.checked=true; addSkipPresent.checked=true;
     rowMatch.value="contains"; dropEmpty.checked=false; dedupe.checked=false;
+    consolidateOn.checked=false; consolidateBody.hidden=true;
+    state.aggMethods={}; state.keyCol=null; addCount.checked=true; joinSep.value=", ";
     rebuildColumnUI(); refresh();
   });
 
