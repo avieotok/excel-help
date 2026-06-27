@@ -1100,8 +1100,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     html.push('</tr></thead><tbody>');
     for(var r=0;r<shown;r++){
       var item=cons.rows[r];
-      var dupClass = (highlightDupes.checked && item.count>1) ? ' class="dup"' : '';
-      html.push('<tr'+dupClass+'><td class="rownum">'+(r+1)+'</td>');
+      html.push('<tr><td class="rownum">'+(r+1)+'</td>');
       cols.forEach(function(j){
         var v=fmt(item.row[j]);
         html.push('<td class="'+(v===""?"empty-cell":"")+'" title="'+escAttr(v)+'">'+(v===""?"—":escHtml(v))+'</td>');
