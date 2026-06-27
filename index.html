@@ -595,6 +595,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <button class="pick-btn2" id="vlkPick">בחירת קובץ שני</button>
             <input type="file" id="vlkFile" accept=".xlsx,.xls,.csv,.tsv" class="visually-hidden">
             <div id="vlkStatus" class="vlk-status"></div>
+            <div id="vlkFileActions" hidden style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+              <button class="mini" id="vlkReplace">החלפה בקובץ אחר</button>
+              <button class="mini" id="vlkRemove">הסרת הקובץ השני</button>
+            </div>
 
             <div id="vlkBody" hidden>
               <label class="field-label">2. העמודה המשותפת <u>בקובץ שלך</u>:</label>
@@ -715,6 +719,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var consolidateOn=$("consolidateOn"), consolidateBody=$("consolidateBody"), keyCol=$("keyCol");
   var highlightDupes=$("highlightDupes");
   var vlkPick=$("vlkPick"), vlkFile=$("vlkFile"), vlkStatus=$("vlkStatus"), vlkBody=$("vlkBody");
+  var vlkFileActions=$("vlkFileActions"), vlkReplace=$("vlkReplace"), vlkRemove=$("vlkRemove");
   var vlkMainKey=$("vlkMainKey"), vlkSrcKey=$("vlkSrcKey"), vlkBringChips=$("vlkBringChips");
   var pivotOn=$("pivotOn"), pivotBody=$("pivotBody"), pivotGroup=$("pivotGroup"), pivotAgg=$("pivotAgg"), pivotVal=$("pivotVal"), pivotValWrap=$("pivotValWrap");
   var aggList=$("aggList"), addCount=$("addCount"), joinSep=$("joinSep");
@@ -1290,6 +1295,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         populateVlkSrcKey();
         renderVlkBringChips();
         vlkBody.hidden=false;
+        vlkPick.hidden=true;
+        vlkFileActions.hidden=false;
         refresh();
       }catch(err){
         vlkStatus.textContent="לא הצלחתי לקרוא את הקובץ השני. ודאו שזה אקסל או CSV תקין.";
@@ -1678,7 +1685,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     appView.hidden=true; uploadView.hidden=false; resetBtn.hidden=true;
     appGrid.hidden=true; choosePrompt.hidden=true; sheetTabsWrap.hidden=true;
     fileInput.value=""; state.aoa=[]; state.computed=null; state.activeSheet=null;
-    state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}}; vlkBody.hidden=true; vlkStatus.textContent="";
+    state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}}; vlkBody.hidden=true; vlkStatus.textContent=""; vlkFileActions.hidden=true; vlkPick.hidden=false;
     pivotOn.checked=false; pivotBody.hidden=true; pivotValWrap.hidden=true;
   });
 
@@ -1743,6 +1750,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   // VLOOKUP events
   vlkPick.addEventListener("click",function(){ vlkFile.click(); });
+  vlkReplace.addEventListener("click",function(){ vlkFile.click(); });
+  vlkRemove.addEventListener("click",function(){
+    state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}};
+    vlkBody.hidden=true; vlkFileActions.hidden=true; vlkPick.hidden=false; vlkStatus.textContent="";
+    refresh();
+  });
   vlkFile.addEventListener("change",function(e){
     var f=e.target.files && e.target.files[0];
     if(f) loadVlkFile(f);
@@ -1791,7 +1804,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     rowMatch.value="contains"; dropEmpty.checked=false; dedupe.checked=false;
     consolidateOn.checked=false; consolidateBody.hidden=true; highlightDupes.checked=false;
     state.aggMethods={}; state.keyCol=null; addCount.checked=true; joinSep.value=", ";
-    state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}}; vlkBody.hidden=true; vlkStatus.textContent="";
+    state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}}; vlkBody.hidden=true; vlkStatus.textContent=""; vlkFileActions.hidden=true; vlkPick.hidden=false;
     pivotOn.checked=false; pivotBody.hidden=true; pivotAgg.value="count"; pivotValWrap.hidden=true;
     rebuildColumnUI(); refresh();
   });
