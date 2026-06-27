@@ -320,6 +320,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .sum-result .sum-big{font-size:30px;font-weight:800;color:var(--teal-deep);letter-spacing:-.5px;}
   .sum-result .sum-label{font-size:13px;color:#0c5a50;margin-bottom:6px;font-weight:700;}
   .sum-result .sum-meta{font-size:12.5px;color:#0c5a50;margin-top:8px;line-height:1.6;}
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px;}
+  .stat-cell{background:#fff;border:1px solid #bfe5de;border-radius:10px;padding:10px 12px;text-align:center;}
+  .stat-cell .stat-k{font-size:12px;color:#0c5a50;font-weight:700;margin-bottom:4px;}
+  .stat-cell .stat-v{font-size:18px;font-weight:800;color:var(--teal-deep);}
+  .stat-cell .stat-v.stat-main{font-size:24px;}
+  @media (max-width:560px){ .stat-grid{grid-template-columns:repeat(2,1fr);} }
   .suggest-box{margin-top:18px;border-top:1px solid var(--line);padding-top:16px;}
   .suggest-title{font-size:14px;font-weight:800;color:var(--ink);}
   .suggest-summary{font-size:13px;font-weight:700;color:var(--teal-deep);margin:12px 0 8px;}
@@ -502,7 +508,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <button class="ptab" data-pane="pane7">איחוד רשומות</button>
             <button class="ptab" data-pane="pane8">שליפת מידע (VLOOKUP)</button>
             <button class="ptab" data-pane="pane9">טבלת ציר (Pivot)</button>
-            <button class="ptab" data-pane="pane10">חיבור</button>
+            <button class="ptab" data-pane="pane10">סיכום וסטטיסטיקה</button>
           </div>
 
           <div class="pcard pane show" id="pane1">
@@ -533,13 +539,23 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
           <div class="pcard pane" id="pane3">
             <h4><span class="step">3</span> חיפוש והחלפה</h4>
-            <p class="sub">מצאו מילה — היא תסומן באדום בתצוגה — והחליפו אותה במילה אחרת.</p>
+            <p class="sub">מצאו מילה — היא תסומן באדום בתצוגה — והחליפו אותה במילה אחרת. אפשר לבחור היכן בתוך המילה להחליף.</p>
 
             <label class="field-label" style="margin-top:0">מצא (המילה לחיפוש):</label>
             <input type="text" id="rFind" placeholder="למשל: זמני">
 
             <label class="field-label">החלף ב:</label>
             <input type="text" id="rTo" placeholder="למשל: קבוע (אפשר להשאיר ריק)">
+
+            <label class="field-label">היכן להחליף?</label>
+            <select id="rPos">
+              <option value="anywhere">בכל מקום בתא</option>
+              <option value="start">בתחילת המילה</option>
+              <option value="end">בסוף המילה</option>
+              <option value="middle">באמצע המילה</option>
+            </select>
+            <label class="opt"><input type="checkbox" id="rWhole"> מילים שלמות בלבד</label>
+            <label class="opt"><input type="checkbox" id="rCase"> התאמת אותיות גדולות/קטנות (אנגלית)</label>
 
             <label class="field-label">באילו עמודות לחפש?</label>
             <div class="chip-tools">
@@ -707,22 +723,25 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
               <select id="pivotAgg">
                 <option value="count">ספירה — כמה שורות בכל ערך</option>
                 <option value="sum">סכום — לסכום עמודת מספרים</option>
+                <option value="avg">ממוצע — של עמודת מספרים</option>
+                <option value="min">מינימום — של עמודת מספרים</option>
+                <option value="max">מקסימום — של עמודת מספרים</option>
               </select>
               <div id="pivotValWrap" hidden>
-                <label class="field-label">עמודת המספרים לסכימה:</label>
+                <label class="field-label">עמודת המספרים לחישוב:</label>
                 <select id="pivotVal"></select>
               </div>
             </div>
           </div>
 
           <div class="pcard pane" id="pane10">
-            <h4><span class="step">10</span> חיבור — סכום של עמודה</h4>
-            <p class="sub">בחרו עמודה של מספרים, ולחצו "חשב סכום" כדי לראות את הסכום הכולל שלה (לפי הנתונים הנוכחיים, אחרי ניקוי ומחיקות).</p>
+            <h4><span class="step">10</span> סיכום וסטטיסטיקה של עמודה</h4>
+            <p class="sub">בחרו עמודה של מספרים ולחצו "חשב" כדי לראות סכום, ממוצע, מינימום, מקסימום ומספר ערכים (לפי הנתונים הנוכחיים, אחרי ניקוי ומחיקות).</p>
 
             <label class="field-label" style="margin-top:0">בחרו עמודה לסיכום:</label>
             <select id="sumCol"></select>
 
-            <button class="pick-btn2" id="sumBtn" style="margin-top:14px">חשב סכום</button>
+            <button class="pick-btn2" id="sumBtn" style="margin-top:14px">חשב</button>
 
             <div id="sumResult" class="sum-result" hidden></div>
 
@@ -813,6 +832,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var addTextInput=$("addText"), addPos=$("addPos"), addColChips=$("addColChips"), addSelAll=$("addSelAll"), addSelNone=$("addSelNone");
   var addSep=$("addSep"), addSkipEmpty=$("addSkipEmpty"), addSkipPresent=$("addSkipPresent");
   var rFind=$("rFind"), rTo=$("rTo"), replaceColChips=$("replaceColChips"), repSelAll=$("repSelAll"), repSelNone=$("repSelNone");
+  var rPos=$("rPos"), rWhole=$("rWhole"), rCase=$("rCase");
   var dropColChips=$("dropColChips"), dropSelAll=$("dropSelAll"), dropSelNone=$("dropSelNone");
   var dedupe=$("dedupe"), statCols=$("statCols"), resetSettings=$("resetSettings");
   var consolidateOn=$("consolidateOn"), consolidateBody=$("consolidateBody"), keyCol=$("keyCol");
@@ -921,10 +941,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     return (o.pos==="start") ? (o.text+sep+s) : (s+sep+o.text);
   }
 
-  function applyReplaceSimple(value, find, repl){
+  function applyReplaceSimple(value, find, repl, opts){
     if(typeof value !== "string" || !find) return value;
     try{
-      var re=new RegExp(escapeRegExp(find), "gi");
+      var pat = (opts && (opts.pos!=="anywhere" || opts.wholeWord))
+        ? buildPattern(find, opts.pos||"anywhere", !!opts.wholeWord)
+        : escapeRegExp(find);
+      var re=new RegExp(pat, (opts && opts.caseSens) ? "g" : "gi");
       return value.replace(re, function(){ return repl; });
     }catch(e){ return value; }
   }
@@ -959,6 +982,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     // find & replace setup (own columns)
     var findTerm=rFind.value;
     var replTerm=rTo.value;
+    var replOpts={ pos:rPos.value, wholeWord:rWhole.checked, caseSens:rCase.checked };
     var doReplace = findTerm.length>0 && replTerm.length>0;  // apply only when replacement provided
     var repCols=state.replaceCols;
     var repColList=[];
@@ -1010,7 +1034,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           cur = cleanCell(cur, words, opts).value;
         }
         if(doReplace && inReplaceCols(j)){
-          cur = applyReplaceSimple(cur, findTerm, replTerm);
+          cur = applyReplaceSimple(cur, findTerm, replTerm, replOpts);
         }
         if(addActive && (anyAddCol ? addSel[j] : true)){
           cur = applyAdd(cur, addOpts);
@@ -1325,7 +1349,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       var g=piv.rows[r][0], v=piv.rows[r][1];
       html.push('<tr><td class="rownum">'+(r+1)+'</td><td>'+escHtml(g)+'</td><td class="rownum" style="text-align:right;font-weight:700">'+(typeof v==="number"?v.toLocaleString("he-IL"):escHtml(v))+'</td></tr>');
     }
-    html.push('<tr style="background:#f3f6f5;font-weight:800"><td></td><td>סה"כ</td><td class="rownum" style="text-align:right;font-weight:800">'+piv.total.toLocaleString("he-IL")+'</td></tr>');
+    var totLabel=(piv.aggKind==="avg")?"ממוצע כללי":(piv.aggKind==="min")?"המינימום":(piv.aggKind==="max")?"המקסימום":"סה\"כ";
+    html.push('<tr style="background:#f3f6f5;font-weight:800"><td></td><td>'+totLabel+'</td><td class="rownum" style="text-align:right;font-weight:800">'+piv.total.toLocaleString("he-IL")+'</td></tr>');
     html.push('</tbody></table>');
     tablewrap.innerHTML=html.join("");
     tableNote.hidden=false;
@@ -1774,18 +1799,19 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     var res=state.computed || compute();
     var col=parseInt(sumCol.value,10);
     if(isNaN(col)){ return null; }
-    var sum=0, numCount=0, skipped=0, total=0;
+    var sum=0, numCount=0, skipped=0, total=0, mn=null, mx=null;
     for(var r=0;r<res.cleaned.length;r++){
       if(res.deleted[r]) continue;
       total++;
       var raw=valStr(res.cleaned[r][col]).trim();
       if(raw===""){ continue; }
       var n=Number(raw.replace(/,/g,""));
-      if(!isNaN(n)){ sum+=n; numCount++; }
+      if(!isNaN(n)){ sum+=n; numCount++; if(mn===null||n<mn) mn=n; if(mx===null||n>mx) mx=n; }
       else { skipped++; }
     }
     var names=uiHeaderNames();
-    return { sum:sum, numCount:numCount, skipped:skipped, total:total, name:names[col]||"" };
+    return { sum:sum, numCount:numCount, skipped:skipped, total:total, name:names[col]||"",
+             avg: numCount? (sum/numCount) : null, min:mn, max:mx };
   }
   function omitHeaderInOutput(){ return hasHeader.checked && dropHeaderRow.checked; }
 
@@ -1874,14 +1900,20 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     return row;
   }
 
+  function fmtNum(n){ return (n===null||n===undefined) ? "—" : Number(n).toLocaleString("he-IL",{maximumFractionDigits:2}); }
   function showColumnSum(){
     var r=computeColumnSum();
     if(!r){ sumResult.hidden=true; return; }
-    var html='<div class="sum-label">סכום העמודה "'+escHtml(r.name)+'":</div>'+
-      '<div class="sum-big">'+r.sum.toLocaleString("he-IL",{maximumFractionDigits:2})+'</div>'+
-      '<div class="sum-meta">חוברו '+r.numCount.toLocaleString("he-IL")+' ערכים מספריים מתוך '+r.total.toLocaleString("he-IL")+' שורות.';
-    if(r.skipped>0) html+='<br>'+r.skipped.toLocaleString("he-IL")+' תאים דולגו (לא מספריים).';
-    html+='</div>';
+    var html='<div class="sum-label">סיכום העמודה "'+escHtml(r.name)+'":</div>'+
+      '<div class="stat-grid">'+
+        '<div class="stat-cell"><div class="stat-k">סכום</div><div class="stat-v stat-main">'+fmtNum(r.sum)+'</div></div>'+
+        '<div class="stat-cell"><div class="stat-k">ממוצע</div><div class="stat-v">'+fmtNum(r.avg)+'</div></div>'+
+        '<div class="stat-cell"><div class="stat-k">מינימום</div><div class="stat-v">'+fmtNum(r.min)+'</div></div>'+
+        '<div class="stat-cell"><div class="stat-k">מקסימום</div><div class="stat-v">'+fmtNum(r.max)+'</div></div>'+
+        '<div class="stat-cell"><div class="stat-k">מספר ערכים</div><div class="stat-v">'+fmtNum(r.numCount)+'</div></div>'+
+        '<div class="stat-cell"><div class="stat-k">סך שורות</div><div class="stat-v">'+fmtNum(r.total)+'</div></div>'+
+      '</div>';
+    if(r.skipped>0) html+='<div class="sum-meta">'+r.skipped.toLocaleString("he-IL")+' תאים לא מספריים דולגו.</div>';
     sumResult.innerHTML=html;
     sumResult.hidden=false;
   }
@@ -1894,19 +1926,44 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     var gCol=parseInt(pivotGroup.value,10);
     var agg=pivotAgg.value;
     var vCol=parseInt(pivotVal.value,10);
-    var order=[], acc={};
+    var order=[], lists={}, counts={};
     for(var i=0;i<rows.length;i++){
       var g=valStr(rows[i][gCol]).trim(); if(g==="") g="(ריק)";
-      if(!(g in acc)){ acc[g]=0; order.push(g); }
-      if(agg==="count") acc[g]+=1;
-      else { var n=Number(valStr(rows[i][vCol]).trim()); if(valStr(rows[i][vCol]).trim()!=="" && !isNaN(n)) acc[g]+=n; }
+      if(!(g in lists)){ lists[g]=[]; counts[g]=0; order.push(g); }
+      counts[g]+=1;
+      if(agg!=="count"){
+        var t=valStr(rows[i][vCol]).trim();
+        var n=Number(t.replace(/,/g,""));
+        if(t!=="" && !isNaN(n)) lists[g].push(n);
+      }
     }
-    var out=order.map(function(g){ return [g, acc[g]]; });
+    function calc(g){
+      if(agg==="count") return counts[g];
+      var a=lists[g]; if(!a.length) return 0;
+      var s=0; for(var k=0;k<a.length;k++) s+=a[k];
+      if(agg==="sum") return s;
+      if(agg==="avg") return Math.round(s/a.length*100)/100;
+      if(agg==="min") return Math.min.apply(null,a);
+      if(agg==="max") return Math.max.apply(null,a);
+      return s;
+    }
+    var out=order.map(function(g){ return [g, calc(g)]; });
     out.sort(function(a,b){ return b[1]-a[1]; });
-    var total=0; for(var t=0;t<out.length;t++) total+=out[t][1];
     var names=headerNames();
-    var resultName = (agg==="count") ? "מספר שורות" : ("סכום של "+(names[vCol]||""));
-    return { rows:out, total:total, groupName:names[gCol]||"", resultName:resultName };
+    var labels={count:"מספר שורות", sum:"סכום של ", avg:"ממוצע של ", min:"מינימום של ", max:"מקסימום של "};
+    var resultName = (agg==="count") ? "מספר שורות" : (labels[agg]+(names[vCol]||""));
+    // total row meaningful for count/sum; for avg/min/max show overall over all rows
+    var total;
+    if(agg==="count"){ total=0; for(var c=0;c<out.length;c++) total+=out[c][1]; }
+    else if(agg==="sum"){ total=0; for(var s2=0;s2<out.length;s2++) total+=out[s2][1]; }
+    else {
+      var allNums=[]; for(var gk in lists){ for(var z=0;z<lists[gk].length;z++) allNums.push(lists[gk][z]); }
+      if(!allNums.length) total=0;
+      else if(agg==="avg"){ var ss=0; for(var q=0;q<allNums.length;q++) ss+=allNums[q]; total=Math.round(ss/allNums.length*100)/100; }
+      else if(agg==="min") total=Math.min.apply(null,allNums);
+      else total=Math.max.apply(null,allNums);
+    }
+    return { rows:out, total:total, groupName:names[gCol]||"", resultName:resultName, aggKind:agg };
   }
   // surviving cleaned rows (post deletion)
   function survivingRows(res){
@@ -1923,7 +1980,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       var piv=computePivot(survivingRows(res));
       var po=[[piv.groupName, piv.resultName]];
       for(var pi=0;pi<piv.rows.length;pi++){ po.push([piv.rows[pi][0], piv.rows[pi][1]]); }
-      po.push(["סה\"כ", piv.total]);
+      var ptl=(piv.aggKind==="avg")?"ממוצע כללי":(piv.aggKind==="min")?"המינימום":(piv.aggKind==="max")?"המקסימום":"סה\"כ";
+      po.push([ptl, piv.total]);
       return po;
     }
 
@@ -2079,6 +2137,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   addTextInput.addEventListener("input",deb);
   rFind.addEventListener("input",deb);
   rTo.addEventListener("input",deb);
+  rPos.addEventListener("change",refresh);
+  rWhole.addEventListener("change",refresh);
+  rCase.addEventListener("change",refresh);
   repSelAll.addEventListener("click",function(){
     for(var j=0;j<state.ncols;j++) state.replaceCols[j]=true;
     renderReplaceColChips(); refresh();
@@ -2130,7 +2191,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   });
   pivotGroup.addEventListener("change",refresh);
   pivotAgg.addEventListener("change",function(){
-    pivotValWrap.hidden=(pivotAgg.value!=="sum");
+    pivotValWrap.hidden=(pivotAgg.value==="count");
     refresh();
   });
   pivotVal.addEventListener("change",refresh);
@@ -2220,6 +2281,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     state.selectedCols={}; state.replaceCols={}; state.addCols={}; state.dropCols={}; state.rowCols={}; state.manualDeleted={};
     wordsInput.value=""; rFind.value=""; rTo.value=""; rowValues.value=""; addTextInput.value="";
     wholeWord.checked=false; caseSens.checked=false; collapse.checked=true; matchPos.value="anywhere";
+    rPos.value="anywhere"; rWhole.checked=false; rCase.checked=false;
     addPos.value="end"; addSep.checked=true; addSkipEmpty.checked=true; addSkipPresent.checked=true;
     rowMatch.value="contains"; dropEmpty.checked=false; dedupe.checked=false;
     consolidateOn.checked=false; consolidateBody.hidden=true; highlightDupes.checked=false;
