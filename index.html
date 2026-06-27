@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מנקה גיליונות — ניקוי מילים ומחיקת שורות באקסל</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMwRTlEOEMiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDc2MTU2Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNSIgZmlsbD0idXJsKCNnKSIvPgogIDwhLS0gZmFpbnQgc3ByZWFkc2hlZXQgZ3JpZCAtLT4KICA8ZyBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS1vcGFjaXR5PSIwLjIyIiBzdHJva2Utd2lkdGg9IjIiPgogICAgPGxpbmUgeDE9IjE0IiB5MT0iMjYiIHgyPSI1MCIgeTI9IjI2Ii8+CiAgICA8bGluZSB4MT0iMTQiIHkxPSIzOCIgeDI9IjUwIiB5Mj0iMzgiLz4KICAgIDxsaW5lIHgxPSIyNiIgeTE9IjE0IiB4Mj0iMjYiIHkyPSI1MCIvPgogICAgPGxpbmUgeDE9IjM4IiB5MT0iMTQiIHgyPSIzOCIgeTI9IjUwIi8+CiAgPC9nPgogIDwhLS0gYnJvb20gLyBjbGVhbiBzd2VlcCAtLT4KICA8ZyBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMy40IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPHBhdGggZD0iTTQ0IDE0IEwzMCAyOCIvPgogICAgPHBhdGggZD0iTTIyIDM2IEwyOCAzMCBMNDAgNDIgTDM0IDQ4IFoiLz4KICAgIDxwYXRoIGQ9Ik0yMiAzNiBMMTYgNTAgTTI4IDQwIEwyNCA1MCBNMzQgNDQgTDMxIDUwIi8+CiAgPC9nPgo8L3N2Zz4K">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0B8A7B">
+<meta name="description" content="ניקוי מילים, החלפה, הוספת טקסט ומחיקת שורות ועמודות בקובצי אקסל — הכול בדפדפן.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --canvas:#ECEFED;
+    --surface:#FFFFFF;
+    --ink:#15201C;
+    --muted:#5E6B66;
+    --line:#D6DEDA;
+    --line-soft:#E6ECE9;
+    --teal:#0B8A7B;
+    --teal-deep:#076156;
+    --teal-soft:#DBF0EC;
+    --coral:#D9463E;
+    --coral-soft:#FAE2E0;
+    --amber:#B8821F;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(16,40,34,.04), 0 8px 28px rgba(16,40,34,.07);
+    --shadow-sm:0 1px 2px rgba(16,40,34,.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--canvas);
+    color:var(--ink);
+    font-family:"Assistant",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  button{font-family:inherit;cursor:pointer;}
+  input,textarea,select{font-family:inherit;color:var(--ink);}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:16px;
+    padding:18px clamp(16px,4vw,40px);
+    border-bottom:1px solid var(--line);
+    background:var(--canvas);
+    position:sticky;top:0;z-index:30;
+  }
+  .wordmark{display:flex;align-items:center;gap:12px;}
+  .wordmark .glyph{
+    width:38px;height:38px;border-radius:10px;flex:none;
+    background:linear-gradient(150deg,var(--teal),var(--teal-deep));
+    display:grid;place-items:center;box-shadow:var(--shadow-sm);
+    position:relative;overflow:hidden;
+  }
+  .wordmark .glyph::after{
+    content:"";position:absolute;inset:0;
+    background:
+      linear-gradient(transparent 49%, rgba(255,255,255,.5) 49%, rgba(255,255,255,.5) 51%, transparent 51%) 0 0/100% 9px,
+      linear-gradient(90deg, transparent 49%, rgba(255,255,255,.35) 49%, rgba(255,255,255,.35) 51%, transparent 51%) 0 0/13px 100%;
+    opacity:.55;
+  }
+  .wordmark .glyph svg{position:relative;z-index:1;}
+  .wordmark h1{
+    font-family:"Frank Ruhl Libre",serif;font-weight:900;
+    font-size:21px;margin:0;line-height:1;letter-spacing:-.01em;
+  }
+  .wordmark p{margin:2px 0 0;font-size:12.5px;color:var(--muted);font-weight:500;}
+  .ghost-btn{
+    background:var(--surface);border:1px solid var(--line);
+    color:var(--ink);border-radius:10px;padding:9px 15px;font-weight:600;font-size:14px;
+    box-shadow:var(--shadow-sm);transition:border-color .15s, transform .05s;
+  }
+  .ghost-btn:hover{border-color:var(--teal);}
+  .ghost-btn:active{transform:translateY(1px);}
+  .ghost-btn[hidden]{display:none;}
+
+  main{padding:clamp(16px,4vw,40px);max-width:1320px;margin:0 auto;}
+
+  /* ---------- upload ---------- */
+  .intro{max-width:560px;margin:6vh auto 22px;text-align:center;}
+  .intro h2{
+    font-family:"Frank Ruhl Libre",serif;font-weight:900;
+    font-size:clamp(28px,5vw,40px);line-height:1.1;margin:0 0 12px;letter-spacing:-.015em;
+  }
+  .intro p{color:var(--muted);font-size:16px;margin:0;}
+  .dropzone{
+    max-width:560px;margin:0 auto;
+    background:var(--surface);border:2px dashed var(--line);
+    border-radius:var(--radius);padding:46px 28px;text-align:center;
+    box-shadow:var(--shadow);transition:border-color .18s, background .18s;
+  }
+  .dropzone.drag{border-color:var(--teal);background:var(--teal-soft);}
+  .dropzone .di{
+    width:54px;height:54px;border-radius:14px;margin:0 auto 16px;
+    background:var(--teal-soft);display:grid;place-items:center;color:var(--teal-deep);
+  }
+  .dropzone h3{margin:0 0 6px;font-size:18px;font-weight:700;}
+  .dropzone .hint{color:var(--muted);font-size:13.5px;margin:0 0 20px;}
+  .pick-btn{
+    background:var(--teal);color:#fff;border:none;border-radius:11px;
+    padding:12px 26px;font-weight:700;font-size:15px;box-shadow:var(--shadow-sm);
+    transition:background .15s, transform .05s;
+  }
+  .pick-btn:hover{background:var(--teal-deep);}
+  .pick-btn:active{transform:translateY(1px);}
+  .formats{margin-top:18px;font-size:12px;color:var(--muted);}
+  .formats code{background:var(--line-soft);border-radius:5px;padding:2px 7px;font-size:11.5px;}
+
+  /* ---------- app layout ---------- */
+  .app{display:grid;grid-template-columns:340px 1fr;gap:22px;align-items:start;}
+  @media (max-width:900px){ .app{grid-template-columns:1fr;} }
+
+  .panel{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;position:sticky;top:90px;
+  }
+  @media (max-width:900px){ .panel{position:static;} }
+  .panel-scroll{max-height:calc(100vh - 120px);overflow:auto;}
+  @media (max-width:900px){ .panel-scroll{max-height:none;} }
+
+  .pcard{padding:18px 18px;border-bottom:1px solid var(--line-soft);}
+  .pcard:last-child{border-bottom:none;}
+  .pcard h4{
+    margin:0 0 4px;font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px;
+  }
+  .pcard .step{
+    width:22px;height:22px;border-radius:7px;flex:none;display:grid;place-items:center;
+    background:var(--ink);color:#fff;font-size:12px;font-weight:700;font-family:"Assistant";
+  }
+  .pcard .sub{margin:0 0 12px;font-size:12.5px;color:var(--muted);line-height:1.45;}
+
+  textarea, input[type=text]{
+    width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+    font-size:14px;background:#fbfdfc;resize:vertical;transition:border-color .15s, box-shadow .15s;
+  }
+  textarea{min-height:78px;line-height:1.5;}
+  textarea:focus, input[type=text]:focus, select:focus{
+    outline:none;border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-soft);
+  }
+  select{
+    width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 12px;
+    font-size:14px;background:#fbfdfc;appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235E6B66' stroke-width='2.5'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat;background-position:left 12px center;
+  }
+
+  .chips{display:flex;flex-wrap:wrap;gap:7px;}
+  .chip{
+    border:1px solid var(--line);background:#fbfdfc;border-radius:999px;
+    padding:6px 12px;font-size:13px;font-weight:600;color:var(--muted);
+    transition:all .12s;user-select:none;max-width:100%;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .chip:hover{border-color:var(--teal);}
+  .chip.on{background:var(--teal);border-color:var(--teal);color:#fff;}
+  .chip-tools{display:flex;gap:6px;margin-bottom:10px;}
+  .mini{font-size:12px;font-weight:600;color:var(--teal-deep);background:none;border:none;padding:2px 4px;text-decoration:underline;text-underline-offset:2px;}
+  .mini:hover{color:var(--teal);}
+
+  .opt{display:flex;align-items:center;gap:9px;margin-top:10px;font-size:13.5px;color:var(--ink);cursor:pointer;}
+  .opt input{accent-color:var(--teal);width:16px;height:16px;flex:none;cursor:pointer;}
+  .field-label{display:block;font-size:12.5px;font-weight:700;color:var(--ink);margin:12px 0 6px;}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+  /* ---------- summary ---------- */
+  .summary{
+    display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;
+  }
+  .stat{
+    flex:1;min-width:120px;background:var(--surface);border:1px solid var(--line);
+    border-radius:12px;padding:12px 15px;box-shadow:var(--shadow-sm);
+  }
+  .stat .n{font-size:24px;font-weight:800;font-family:"Assistant";line-height:1;letter-spacing:-.02em;}
+  .stat .l{font-size:12px;color:var(--muted);margin-top:4px;font-weight:600;}
+  .stat.keep .n{color:var(--teal-deep);}
+  .stat.del .n{color:var(--coral);}
+  .stat.edit .n{color:var(--amber);}
+  .stat.col .n{color:#516b64;}
+
+  th.col-dropped, td.col-dropped{
+    color:#aeb8b4 !important;text-decoration:line-through;text-decoration-color:var(--coral);
+    background:#f4f1f1 !important;
+  }
+
+  .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:14px;}
+  .toolbar .grow{flex:1;}
+  .export-btn{
+    background:var(--teal);color:#fff;border:none;border-radius:11px;
+    padding:11px 22px;font-weight:800;font-size:14.5px;box-shadow:var(--shadow-sm);
+    display:inline-flex;align-items:center;gap:9px;transition:background .15s, transform .05s;
+  }
+  .export-btn:hover{background:var(--teal-deep);}
+  .export-btn:active{transform:translateY(1px);}
+  .csv-btn{
+    background:var(--surface);border:1px solid var(--line);color:var(--ink);
+    border-radius:11px;padding:11px 18px;font-weight:700;font-size:14px;box-shadow:var(--shadow-sm);
+  }
+  .csv-btn:hover{border-color:var(--teal);}
+  .refresh-btn{
+    background:var(--surface);border:1px solid var(--line);color:var(--ink);
+    border-radius:11px;padding:11px 18px;font-weight:700;font-size:14px;box-shadow:var(--shadow-sm);
+    display:inline-flex;align-items:center;gap:8px;transition:border-color .15s, color .15s, transform .05s;
+  }
+  .refresh-btn:hover{border-color:var(--teal);color:var(--teal-deep);}
+  .refresh-btn:active{transform:translateY(1px);}
+  .refresh-btn.done{border-color:var(--teal);color:var(--teal-deep);background:var(--teal-soft);}
+  .refresh-btn.spinning svg{animation:rspin .6s linear;}
+  @keyframes rspin{ from{transform:rotate(0)} to{transform:rotate(-360deg)} }
+  @media (prefers-reduced-motion:reduce){ .refresh-btn.spinning svg{animation:none;} }
+
+  /* ---------- table ---------- */
+  .tablewrap{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:auto;max-height:72vh;
+  }
+  table{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px;}
+  thead th{
+    position:sticky;top:0;z-index:2;background:#f3f6f5;
+    border-bottom:1px solid var(--line);
+    padding:11px 12px;text-align:right;font-weight:700;white-space:nowrap;
+    color:var(--ink);
+  }
+  thead th.del-col{width:46px;text-align:center;}
+  tbody td{
+    border-bottom:1px solid var(--line-soft);padding:9px 12px;
+    max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    vertical-align:top;
+  }
+  tbody tr:hover td{background:#f8fbfa;}
+  td.del-col{text-align:center;}
+  td.del-col input{accent-color:var(--coral);width:16px;height:16px;cursor:pointer;}
+  td.changed{background:var(--teal-soft);}
+  tr:hover td.changed{background:#cdeae4;}
+  td.empty-cell{color:#b6c0bc;font-style:italic;}
+  tr.deleted td{
+    color:#b3bdb9;text-decoration:line-through;text-decoration-color:var(--coral);
+    background:repeating-linear-gradient(135deg, #fcf0ef 0 8px, #fbe7e5 8px 16px);
+  }
+  tr.deleted:hover td{background:#f7dedb;}
+  tr.deleted td.del-col{text-decoration:none;}
+  .rownum{color:#aab4b0;font-variant-numeric:tabular-nums;text-align:center;font-size:12px;}
+  thead th.rownum-h{width:42px;text-align:center;}
+
+  .table-note{font-size:12.5px;color:var(--muted);margin:10px 2px 0;}
+  .changed-tag{
+    display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--teal);
+    margin-inline-start:6px;vertical-align:middle;
+  }
+
+  .empty-state{padding:40px;text-align:center;color:var(--muted);}
+
+  .choose-prompt{
+    background:var(--surface);border:1px dashed var(--line);border-radius:var(--radius);
+    padding:48px 28px;text-align:center;box-shadow:var(--shadow-sm);
+  }
+  .choose-prompt .cp-ic{
+    width:50px;height:50px;border-radius:13px;margin:0 auto 16px;
+    background:var(--teal-soft);display:grid;place-items:center;color:var(--teal-deep);
+  }
+  .choose-prompt h3{margin:0 0 6px;font-size:18px;font-weight:800;}
+  .choose-prompt p{margin:0;color:var(--muted);font-size:14px;}
+
+  /* sheet tabs (Excel-like) */
+  .sheettabs-wrap{margin-bottom:18px;}
+  .sheettabs-wrap .sl{font-size:12px;font-weight:700;color:var(--muted);margin:0 2px 7px;display:flex;align-items:center;gap:7px;}
+  .sheettabs-wrap .sl svg{color:var(--teal-deep);}
+  .sheettabs{
+    display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);
+    background:var(--surface);border:1px solid var(--line);border-bottom:none;
+    border-radius:12px 12px 0 0;padding:6px 6px 0;box-shadow:var(--shadow-sm);
+  }
+  .sheettab{
+    padding:10px 16px 11px;background:none;border:none;border-bottom:3px solid transparent;
+    color:var(--muted);font-weight:600;font-size:14px;white-space:nowrap;border-radius:8px 8px 0 0;
+    transition:color .12s, background .12s;
+  }
+  .sheettab:hover{color:var(--ink);background:#f1f5f3;}
+  .sheettab.active{color:var(--teal-deep);border-bottom-color:var(--teal);font-weight:800;background:#f3faf8;}
+  .sheettabs-base{height:0;border-bottom:2px solid var(--teal);border-radius:0 0 12px 12px;}
+
+  /* sheet selector (legacy, hidden) */
+  .sheet-pick{margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--muted);}
+  .sheet-pick select{width:auto;min-width:160px;}
+
+  @media (prefers-reduced-motion:no-preference){
+    .stat .n{transition:color .2s;}
+  }
+  :focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wordmark">
+    <div class="glyph" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 7l-1 11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 7"/>
+        <path d="M3 7h18M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+      </svg>
+    </div>
+    <div>
+      <h1>מנקה גיליונות</h1>
+      <p>ניקוי מילים ומחיקת שורות — הכול בדפדפן שלך</p>
+    </div>
+  </div>
+  <button class="ghost-btn" id="resetBtn" hidden>קובץ אחר</button>
+</div>
+
+<main>
+  <!-- UPLOAD -->
+  <section id="uploadView">
+    <div class="intro">
+      <h2>נקה את הגיליון שלך בכמה לחיצות</h2>
+      <p>מעלים קובץ, בוחרים מילים למחיקה ותנאים לשורות, ורואים בדיוק מה ישתנה לפני שמורידים.</p>
+    </div>
+    <div class="dropzone" id="dropzone">
+      <div class="di" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M12 3v13"/><path d="M7 8l5-5 5 5"/>
+        </svg>
+      </div>
+      <h3>גררו קובץ לכאן</h3>
+      <p class="hint">או בחרו אותו מהמחשב</p>
+      <button class="pick-btn" id="pickBtn">בחירת קובץ</button>
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.tsv" class="visually-hidden">
+      <div class="formats">נתמך: <code>.xlsx</code> <code>.xls</code> <code>.csv</code> — הקובץ לא עוזב את המחשב שלך</div>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section id="appView" hidden>
+    <div class="sheettabs-wrap" id="sheetTabsWrap" hidden>
+      <div class="sl">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        בחרו על איזה גיליון לעבוד
+      </div>
+      <div class="sheettabs" id="sheetTabs" role="tablist"></div>
+      <div class="sheettabs-base"></div>
+    </div>
+
+    <div class="choose-prompt" id="choosePrompt" hidden>
+      <div class="cp-ic" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <h3>בחרו גיליון כדי להתחיל</h3>
+      <p>לחצו על אחת הלשוניות למעלה, ואזור הניקוי ייפתח על הגיליון שבחרתם.</p>
+    </div>
+
+    <div class="app" id="appGrid" hidden>
+      <!-- control panel -->
+      <aside class="panel">
+        <div class="panel-scroll">
+
+          <div class="pcard">
+            <label class="opt" style="margin-top:0">
+              <input type="checkbox" id="hasHeader" checked>
+              השורה הראשונה היא כותרת
+            </label>
+          </div>
+
+          <div class="pcard">
+            <h4><span class="step">1</span> עמודות לעריכה</h4>
+            <p class="sub">העמודות שבהן יחולו מחיקת מילים והחלפות (שלבים 2–3). אם לא נבחרה אף עמודה — לא יחול דבר.</p>
+            <div class="chip-tools">
+              <button class="mini" id="selAll">בחר הכול</button>
+              <button class="mini" id="selNone">נקה בחירה</button>
+            </div>
+            <div class="chips" id="colChips"></div>
+          </div>
+
+          <div class="pcard">
+            <h4><span class="step">2</span> מילים למחיקה</h4>
+            <p class="sub">כל מילה או ביטוי בשורה נפרדת (או מופרדים בפסיקים). הם יוסרו מהתאים בעמודות שבחרתם.</p>
+            <textarea id="wordsInput" placeholder="לדוגמה:&#10;לא רלוונטי&#10;זמני&#10;***"></textarea>
+            <label class="field-label">היכן בתא המילה צריכה להופיע?</label>
+            <select id="matchPos" aria-label="מיקום המילה בתא">
+              <option value="anywhere">בכל מקום בתא (כל האפשרויות)</option>
+              <option value="start">רק בתחילת התא</option>
+              <option value="middle">רק באמצע התא</option>
+              <option value="end">רק בסוף התא</option>
+            </select>
+            <label class="opt"><input type="checkbox" id="wholeWord"> מילים שלמות בלבד</label>
+            <label class="opt"><input type="checkbox" id="caseSens"> תלוי אותיות גדולות/קטנות (אנגלית)</label>
+            <label class="opt"><input type="checkbox" id="collapse" checked> צמצם רווחים כפולים אחרי הניקוי</label>
+          </div>
+
+          <div class="pcard">
+            <h4><span class="step">3</span> חיפוש והחלפה</h4>
+            <p class="sub">החליפו מילה או ביטוי באחר בעמודות לעריכה. שורה לכל החלפה בתבנית <code>מקור =&gt; חלופה</code>. משתמש באותן אפשרויות התאמה של שלב 2 (מיקום, מילים שלמות, אותיות).</p>
+            <textarea id="replacePairs" placeholder="לדוגמה:&#10;זמני =&gt; קבוע&#10;OUT =&gt; IN"></textarea>
+          </div>
+
+          <div class="pcard">
+            <h4><span class="step">4</span> הוספת טקסט</h4>
+            <p class="sub">הוסיפו מילה או משפט לתאים בעמודות שתבחרו — בתחילת התא או בסופו.</p>
+
+            <label class="field-label">טקסט להוספה:</label>
+            <input type="text" id="addText" placeholder="לדוגמה: לבדיקה">
+
+            <label class="field-label">היכן להוסיף?</label>
+            <select id="addPos" aria-label="מיקום ההוספה">
+              <option value="end">בסוף התא</option>
+              <option value="start">בתחילת התא</option>
+            </select>
+
+            <label class="field-label">לאילו עמודות להוסיף?</label>
+            <div class="chip-tools">
+              <button class="mini" id="addSelAll">בחר הכול</button>
+              <button class="mini" id="addSelNone">נקה בחירה</button>
+            </div>
+            <div class="chips" id="addColChips"></div>
+
+            <label class="opt"><input type="checkbox" id="addSep" checked> הוסף רווח מפריד בין הטקסט לתוכן</label>
+            <label class="opt"><input type="checkbox" id="addSkipEmpty" checked> הוסף רק לתאים שאינם ריקים</label>
+            <label class="opt"><input type="checkbox" id="addSkipPresent" checked> אל תוסיף אם הטקסט כבר קיים בתא</label>
+          </div>
+
+          <div class="pcard">
+            <h4><span class="step">5</span> מחיקת עמודות</h4>
+            <p class="sub">בחרו עמודות שיוסרו לגמרי מהקובץ המיוצא. בתצוגה הן יופיעו עם קו חוצה.</p>
+            <div class="chip-tools">
+              <button class="mini" id="dropSelAll">בחר הכול</button>
+              <button class="mini" id="dropSelNone">נקה בחירה</button>
+            </div>
+            <div class="chips" id="dropColChips"></div>
+          </div>
+
+          <div class="pcard">
+            <h4><span class="step">6</span> מחיקת שורות</h4>
+            <p class="sub">הגדירו מתי למחוק שורה שלמה. אפשר לשלב כמה כללים.</p>
+
+            <label class="field-label">מחק שורות שמכילות ערכים אלה:</label>
+            <textarea id="rowValues" placeholder="לדוגמה:&#10;בוטל&#10;כפילות"></textarea>
+
+            <label class="field-label">היכן בתא הערך צריך להופיע?</label>
+            <select id="rowMatch" aria-label="סוג התאמה">
+              <option value="contains">מכיל (בכל מקום בתא)</option>
+              <option value="start">בתחילת התא</option>
+              <option value="middle">באמצע התא</option>
+              <option value="end">בסוף התא</option>
+              <option value="equals">שווה בדיוק לכל התא</option>
+            </select>
+
+            <label class="field-label">באילו עמודות לבדוק?</label>
+            <div class="chip-tools">
+              <button class="mini" id="rowSelAll">בחר הכול</button>
+              <button class="mini" id="rowSelNone">כל העמודות</button>
+            </div>
+            <div class="chips" id="rowColChips"></div>
+            <p class="sub" style="margin:8px 0 0">אם לא נבחרה אף עמודה — הבדיקה תתבצע בכל העמודות.</p>
+
+            <label class="opt" style="margin-top:14px"><input type="checkbox" id="dropEmpty"> מחק שורות שנשארו ריקות אחרי הניקוי</label>
+            <label class="opt" style="margin-top:10px"><input type="checkbox" id="dedupe"> מחק שורות כפולות (השאר את המופע הראשון)</label>
+            <p class="sub" style="margin:14px 0 0">אפשר גם לסמן שורות ידנית בטבלה ←</p>
+            <button class="mini" id="clearManual" style="margin-top:6px" hidden>בטל סימון ידני (<span id="manualCount">0</span>)</button>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- main -->
+      <div>
+        <div class="summary" id="summary">
+          <div class="stat keep"><div class="n" id="statKeep">0</div><div class="l">שורות שיישארו</div></div>
+          <div class="stat del"><div class="n" id="statDel">0</div><div class="l">שורות שיימחקו</div></div>
+          <div class="stat edit"><div class="n" id="statCells">0</div><div class="l">תאים שישתנו</div></div>
+          <div class="stat col"><div class="n" id="statCols">0</div><div class="l">עמודות שיימחקו</div></div>
+        </div>
+
+        <div class="toolbar">
+          <button class="export-btn" id="exportXlsx">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+            הורד אקסל נקי
+          </button>
+          <button class="csv-btn" id="exportCsv">הורד CSV</button>
+          <button class="csv-btn" id="resetSettings" title="אפס את כל הכללים וההגדרות">אפס הגדרות</button>
+          <div class="grow"></div>
+          <button class="refresh-btn" id="refreshBtn" title="חשב מחדש ורענן את התצוגה">
+            <svg id="refreshIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+            <span id="refreshLabel">רענן</span>
+          </button>
+        </div>
+
+        <div class="tablewrap" id="tablewrap">
+          <div class="empty-state" id="tableEmpty">טוען נתונים…</div>
+        </div>
+        <p class="table-note" id="tableNote" hidden></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- state ----------
+  var state = {
+    workbook:null,
+    sheetNames:[],
+    activeSheet:null,
+    aoa:[],            // full array-of-arrays of the active sheet
+    ncols:0,
+    fileName:"clean",
+    selectedCols:{},   // colIndex -> bool (for word cleaning)
+    addCols:{},        // colIndex -> bool (for text addition)
+    dropCols:{},       // colIndex -> bool (columns to remove from output)
+    rowCols:{},        // colIndex -> bool (columns to check for row-deletion values)
+    manualDeleted:{},  // dataRowIndex -> true
+    computed:null      // last compute result
+  };
+
+  var PREVIEW_LIMIT = 600;
+
+  // ---------- elements ----------
+  var $ = function(id){ return document.getElementById(id); };
+  var dropzone=$("dropzone"), fileInput=$("fileInput"), pickBtn=$("pickBtn");
+  var uploadView=$("uploadView"), appView=$("appView"), resetBtn=$("resetBtn");
+  var sheetTabsWrap=$("sheetTabsWrap"), sheetTabs=$("sheetTabs"), hasHeader=$("hasHeader");
+  var appGrid=$("appGrid"), choosePrompt=$("choosePrompt");
+  var colChips=$("colChips"), selAll=$("selAll"), selNone=$("selNone");
+  var wordsInput=$("wordsInput"), wholeWord=$("wholeWord"), caseSens=$("caseSens"), collapse=$("collapse"), matchPos=$("matchPos");
+  var addTextInput=$("addText"), addPos=$("addPos"), addColChips=$("addColChips"), addSelAll=$("addSelAll"), addSelNone=$("addSelNone");
+  var addSep=$("addSep"), addSkipEmpty=$("addSkipEmpty"), addSkipPresent=$("addSkipPresent");
+  var replacePairs=$("replacePairs");
+  var dropColChips=$("dropColChips"), dropSelAll=$("dropSelAll"), dropSelNone=$("dropSelNone");
+  var dedupe=$("dedupe"), statCols=$("statCols"), resetSettings=$("resetSettings");
+  var rowValues=$("rowValues"), rowColChips=$("rowColChips"), rowMatch=$("rowMatch"), dropEmpty=$("dropEmpty");
+  var rowSelAll=$("rowSelAll"), rowSelNone=$("rowSelNone");
+  var clearManual=$("clearManual"), manualCount=$("manualCount");
+  var statKeep=$("statKeep"), statDel=$("statDel"), statCells=$("statCells");
+  var tablewrap=$("tablewrap"), tableEmpty=$("tableEmpty"), tableNote=$("tableNote");
+  var exportXlsx=$("exportXlsx"), exportCsv=$("exportCsv");
+  var refreshBtn=$("refreshBtn"), refreshLabel=$("refreshLabel");
+
+  // ---------- helpers ----------
+  function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); }
+  function colLabel(j){ return XLSX.utils.encode_col(j); }
+  function debounce(fn,ms){ var t; return function(){ clearTimeout(t); var a=arguments,c=this; t=setTimeout(function(){fn.apply(c,a);},ms); }; }
+
+  function parseList(text){
+    if(!text) return [];
+    return text.split(/[\n,]+/).map(function(s){return s.trim();}).filter(function(s){return s.length>0;});
+  }
+
+  function headerNames(){
+    if(hasHeader.checked && state.aoa.length){
+      var h=state.aoa[0];
+      var out=[];
+      for(var j=0;j<state.ncols;j++){
+        var v=h[j];
+        out.push((v!==undefined && v!==null && String(v).trim()!=="") ? String(v) : colLabel(j));
+      }
+      return out;
+    }
+    var arr=[];
+    for(var k=0;k<state.ncols;k++) arr.push("עמודה "+colLabel(k));
+    return arr;
+  }
+
+  function dataRows(){
+    return hasHeader.checked ? state.aoa.slice(1) : state.aoa.slice(0);
+  }
+
+  // ---------- cleaning ----------
+  var WORD_BND = "[\\s,.;:()\\[\\]{}\"'\\-\\/\\\\|!?]";
+
+  function buildPattern(word, pos, wholeWord){
+    var esc=escapeRegExp(word);
+    var wbL = wholeWord ? "(?<=^|"+WORD_BND+")" : "";
+    var wbR = wholeWord ? "(?=$|"+WORD_BND+")" : "";
+    var core = wbL+esc+wbR;
+    if(pos==="start")  return "^\\s*"+core;
+    if(pos==="end")    return core+"\\s*$";
+    if(pos==="middle") return "(?<=\\S\\s*)"+core+"(?=\\s*\\S)";
+    return core; // anywhere
+  }
+
+  function cleanCell(value, words, opts){
+    if(typeof value !== "string"){
+      if(value===null || value===undefined) return {value:value, changed:false};
+      return {value:value, changed:false};
+    }
+    var out=value;
+    var flags = opts.caseSens ? "g" : "gi";
+    for(var i=0;i<words.length;i++){
+      var w=words[i]; if(!w) continue;
+      try{
+        var re=new RegExp(buildPattern(w, opts.pos, opts.wholeWord), flags);
+        out=out.replace(re,"");
+      }catch(e){ /* skip invalid pattern */ }
+    }
+    if(opts.collapse){
+      out=out.replace(/[ \t]{2,}/g," ").replace(/ +([,.;:])/g,"$1");
+    }
+    out=out.replace(/^\s+|\s+$/g,"");
+    return {value:out, changed: out!==value};
+  }
+
+  function isBlank(v){
+    return v===null || v===undefined || (typeof v==="string" && v.trim()==="");
+  }
+
+  function valStr(v){ return (v===null || v===undefined) ? "" : String(v); }
+
+  function applyAdd(value, o){
+    if(!o.text) return value;
+    var s=valStr(value);
+    var emptyCell = s.trim()==="";
+    if(o.skipEmpty && emptyCell) return value;
+    if(o.skipPresent && s.indexOf(o.text)!==-1) return value;
+    var sep = emptyCell ? "" : o.sep;
+    return (o.pos==="start") ? (o.text+sep+s) : (s+sep+o.text);
+  }
+
+  function parsePairs(text){
+    if(!text) return [];
+    return text.split(/\n/).map(function(l){
+      var i=l.indexOf("=>"); if(i===-1) i=l.indexOf("->");
+      if(i===-1) return null;
+      var from=l.slice(0,i).trim(), to=l.slice(i+2).trim();
+      return from ? {from:from, to:to} : null;
+    }).filter(function(p){return p;});
+  }
+
+  function applyReplaces(value, pairs, opts){
+    if(typeof value !== "string") return value;
+    var out=value, flags=opts.caseSens ? "g" : "gi";
+    for(var i=0;i<pairs.length;i++){
+      var p=pairs[i];
+      try{
+        var re=new RegExp(buildPattern(p.from, opts.pos, opts.wholeWord), flags);
+        out=out.replace(re, function(){ return p.to; });
+      }catch(e){ /* skip invalid */ }
+    }
+    return out;
+  }
+
+  // ---------- compute ----------
+  function compute(){
+    var rows=dataRows();
+    var words=parseList(wordsInput.value);
+    var opts={
+      wholeWord:wholeWord.checked,
+      caseSens:caseSens.checked,
+      collapse:collapse.checked,
+      pos:matchPos.value
+    };
+    var sel=state.selectedCols;
+    var anyColSelected=false;
+    for(var c in sel){ if(sel[c]){ anyColSelected=true; break; } }
+
+    // text addition setup
+    var addStr=addTextInput.value;
+    var addActive = addStr.length>0;
+    var addSel=state.addCols;
+    var anyAddCol=false;
+    for(var ac in addSel){ if(addSel[ac]){ anyAddCol=true; break; } }
+    var addOpts={
+      text:addStr, pos:addPos.value,
+      sep: addSep.checked ? " " : "",
+      skipEmpty: addSkipEmpty.checked,
+      skipPresent: addSkipPresent.checked
+    };
+
+    // find & replace setup (shares edit columns + matching options)
+    var pairs=parsePairs(replacePairs.value);
+    var replaceActive = pairs.length>0;
+
+    // dropped columns
+    var dropCols=state.dropCols;
+    var droppedCount=0;
+    for(var dc=0;dc<state.ncols;dc++){ if(dropCols[dc]) droppedCount++; }
+
+    // dedupe
+    var dedupeOn = dedupe.checked;
+    var seenKeys={};
+
+    var delValues=parseList(rowValues.value);
+    var matchMode=rowMatch.value;      // contains|start|middle|end|equals
+    var caseS=opts.caseSens;
+
+    // which columns to check for deletion values
+    var rowCols=state.rowCols;
+    var rowColList=[];
+    for(var rc=0;rc<state.ncols;rc++){ if(rowCols[rc]) rowColList.push(rc); }
+    var checkAllCols = rowColList.length===0;
+
+    function norm(s){ return caseS ? String(s) : String(s).toLowerCase(); }
+    var delValsN = delValues.map(norm);
+
+    var result={
+      cleaned:[],       // cleaned data rows (post word-removal)
+      changedCells:[],  // array of objects {sets} per row: {colIndex:true}
+      deleted:[],       // bool per data row
+      reasons:[],       // string reason per deleted row
+      cellsChanged:0,
+      rowsDeleted:0,
+      droppedCols:droppedCount
+    };
+
+    for(var r=0;r<rows.length;r++){
+      var src=rows[r]||[];
+      var cleanedRow=new Array(state.ncols);
+      var changedSet={};
+      for(var j=0;j<state.ncols;j++){
+        var orig = (j<src.length)? src[j] : "";
+        var cur = orig;
+        if(anyColSelected && sel[j]){
+          if(words.length) cur = cleanCell(cur, words, opts).value;
+          if(replaceActive) cur = applyReplaces(cur, pairs, opts);
+        }
+        if(addActive && anyAddCol && addSel[j]){
+          cur = applyAdd(cur, addOpts);
+        }
+        cleanedRow[j]=cur;
+        if(valStr(orig)!==valStr(cur)){ changedSet[j]=true; result.cellsChanged++; }
+      }
+      result.cleaned.push(cleanedRow);
+      result.changedCells.push(changedSet);
+
+      // ---- deletion rules ----
+      var del=false, reason="";
+
+      // manual
+      if(state.manualDeleted[r]){ del=true; reason="סומן ידנית"; }
+
+      // contains values (in chosen columns, at chosen position)
+      if(!del && delValues.length){
+        var hit=false;
+        if(checkAllCols){
+          for(var k=0;k<state.ncols && !hit;k++){
+            hit = matchCell(src[k], delValsN, matchMode, norm);
+          }
+        } else {
+          for(var ci=0; ci<rowColList.length && !hit; ci++){
+            hit = matchCell(src[rowColList[ci]], delValsN, matchMode, norm);
+          }
+        }
+        if(hit){ del=true; reason="מכיל ערך למחיקה"; }
+      }
+
+      // empty after cleaning (considering only columns that remain)
+      if(!del && dropEmpty.checked){
+        var allBlank=true;
+        for(var m=0;m<state.ncols;m++){ if(!dropCols[m] && !isBlank(cleanedRow[m])){ allBlank=false; break; } }
+        if(allBlank){ del=true; reason="שורה ריקה אחרי ניקוי"; }
+      }
+
+      // duplicate rows (based on remaining columns, post-edit) — keep first
+      if(!del && dedupeOn){
+        var keyParts=[];
+        for(var dk=0;dk<state.ncols;dk++){ if(!dropCols[dk]) keyParts.push(valStr(cleanedRow[dk])); }
+        var key=keyParts.join("\u0001");
+        if(seenKeys[key]){ del=true; reason="שורה כפולה"; }
+        else seenKeys[key]=true;
+      }
+
+      result.deleted.push(del);
+      result.reasons.push(reason);
+      if(del) result.rowsDeleted++;
+    }
+
+    state.computed=result;
+    return result;
+  }
+
+  function matchCell(cell, valsN, mode, norm){
+    if(cell===null || cell===undefined) return false;
+    var s=norm(cell), st=s.trim();
+    for(var i=0;i<valsN.length;i++){
+      var v=valsN[i]; if(!v) continue;
+      if(mode==="equals"){ if(st===v) return true; }
+      else if(mode==="start"){ if(st.indexOf(v)===0) return true; }
+      else if(mode==="end"){ if(st.length>=v.length && st.lastIndexOf(v)===st.length-v.length) return true; }
+      else if(mode==="middle"){
+        var idx=st.indexOf(v);
+        while(idx!==-1){ if(idx>0 && idx+v.length<st.length) return true; idx=st.indexOf(v, idx+1); }
+      }
+      else { if(s.indexOf(v)!==-1) return true; } // contains / anywhere
+    }
+    return false;
+  }
+
+  // ---------- rendering ----------
+  function renderColChips(){
+    var names=headerNames();
+    colChips.innerHTML="";
+    for(var j=0;j<state.ncols;j++){
+      (function(idx,label){
+        var b=document.createElement("button");
+        b.className="chip"+(state.selectedCols[idx]?" on":"");
+        b.textContent=label;
+        b.title=label;
+        b.addEventListener("click",function(){
+          state.selectedCols[idx]=!state.selectedCols[idx];
+          b.classList.toggle("on", state.selectedCols[idx]);
+          refresh();
+        });
+        colChips.appendChild(b);
+      })(j, names[j]);
+    }
+  }
+
+  function renderAddColChips(){
+    var names=headerNames();
+    addColChips.innerHTML="";
+    for(var j=0;j<state.ncols;j++){
+      (function(idx,label){
+        var b=document.createElement("button");
+        b.className="chip"+(state.addCols[idx]?" on":"");
+        b.textContent=label;
+        b.title=label;
+        b.addEventListener("click",function(){
+          state.addCols[idx]=!state.addCols[idx];
+          b.classList.toggle("on", state.addCols[idx]);
+          refresh();
+        });
+        addColChips.appendChild(b);
+      })(j, names[j]);
+    }
+  }
+
+  function renderRowColChips(){
+    var names=headerNames();
+    rowColChips.innerHTML="";
+    for(var j=0;j<state.ncols;j++){
+      (function(idx,label){
+        var b=document.createElement("button");
+        b.className="chip"+(state.rowCols[idx]?" on":"");
+        b.textContent=label;
+        b.title=label;
+        b.addEventListener("click",function(){
+          state.rowCols[idx]=!state.rowCols[idx];
+          b.classList.toggle("on", state.rowCols[idx]);
+          refresh();
+        });
+        rowColChips.appendChild(b);
+      })(j, names[j]);
+    }
+  }
+
+  function fmt(v){
+    if(v===null || v===undefined) return "";
+    return String(v);
+  }
+
+  function renderTable(res){
+    var names=headerNames();
+    var rows=res.cleaned;
+    var total=rows.length;
+    var shown=Math.min(total, PREVIEW_LIMIT);
+
+    var html=['<table><thead><tr>',
+      '<th class="rownum-h">#</th>',
+      '<th class="del-col" title="סמן למחיקה">✕</th>'];
+    for(var j=0;j<state.ncols;j++){
+      html.push('<th class="'+(state.dropCols[j]?'col-dropped':'')+'">'+escHtml(names[j])+'</th>');
+    }
+    html.push('</tr></thead><tbody>');
+
+    for(var r=0;r<shown;r++){
+      var deleted=res.deleted[r];
+      var changed=res.changedCells[r];
+      html.push('<tr class="'+(deleted?'deleted':'')+'" data-r="'+r+'">');
+      html.push('<td class="rownum">'+(r+1)+'</td>');
+      html.push('<td class="del-col"><input type="checkbox" data-del="'+r+'" '+(state.manualDeleted[r]?'checked':'')+' aria-label="מחק שורה '+(r+1)+'"></td>');
+      for(var c=0;c<state.ncols;c++){
+        var v=fmt(rows[r][c]);
+        var cls=[];
+        if(state.dropCols[c]) cls.push("col-dropped");
+        if(changed[c]) cls.push("changed");
+        if(v==="") { cls.push("empty-cell"); }
+        var cellTxt = v===""? "—" : escHtml(v);
+        var dot = (changed[c] && !state.dropCols[c]) ? '<span class="changed-tag" title="שונה"></span>' : '';
+        html.push('<td class="'+cls.join(" ")+'" title="'+escAttr(v)+'">'+cellTxt+dot+'</td>');
+      }
+      html.push('</tr>');
+    }
+    html.push('</tbody></table>');
+    tablewrap.innerHTML=html.join("");
+
+    // bind manual delete checkboxes
+    var boxes=tablewrap.querySelectorAll('input[data-del]');
+    for(var i=0;i<boxes.length;i++){
+      boxes[i].addEventListener("change",function(e){
+        var ri=parseInt(e.target.getAttribute("data-del"),10);
+        if(e.target.checked) state.manualDeleted[ri]=true; else delete state.manualDeleted[ri];
+        refresh();
+      });
+    }
+
+    // note about truncation
+    if(total>shown){
+      tableNote.hidden=false;
+      tableNote.textContent="מוצגות "+shown+" השורות הראשונות מתוך "+total+". הניקוי והמחיקה יחולו על כל השורות בעת הייצוא (סימון ידני זמין לשורות המוצגות).";
+    } else {
+      tableNote.hidden=true;
+    }
+  }
+
+  function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function escAttr(s){ return escHtml(s).replace(/"/g,"&quot;"); }
+
+  function renderSummary(res){
+    var total=res.cleaned.length;
+    statKeep.textContent = (total - res.rowsDeleted).toLocaleString("he-IL");
+    statDel.textContent  = res.rowsDeleted.toLocaleString("he-IL");
+    statCells.textContent= res.cellsChanged.toLocaleString("he-IL");
+    statCols.textContent = (res.droppedCols||0).toLocaleString("he-IL");
+
+    var mc=Object.keys(state.manualDeleted).length;
+    manualCount.textContent=mc;
+    clearManual.hidden = mc===0;
+  }
+
+  // ---------- master refresh ----------
+  function refresh(){
+    if(!state.aoa.length) return;
+    var res=compute();
+    renderSummary(res);
+    renderTable(res);
+  }
+
+  function renderDropColChips(){
+    var names=headerNames();
+    dropColChips.innerHTML="";
+    for(var j=0;j<state.ncols;j++){
+      (function(idx,label){
+        var b=document.createElement("button");
+        b.className="chip"+(state.dropCols[idx]?" on":"");
+        b.textContent=label;
+        b.title=label;
+        b.addEventListener("click",function(){
+          state.dropCols[idx]=!state.dropCols[idx];
+          b.classList.toggle("on", state.dropCols[idx]);
+          refresh();
+        });
+        dropColChips.appendChild(b);
+      })(j, names[j]);
+    }
+  }
+
+  function rebuildColumnUI(){
+    renderColChips();
+    renderAddColChips();
+    renderDropColChips();
+    renderRowColChips();
+  }
+
+  // ---------- file loading ----------
+  function loadWorkbook(arrayBuffer, name){
+    var wb=XLSX.read(arrayBuffer,{type:"array",cellDates:true,cellNF:false,cellText:false});
+    state.workbook=wb;
+    state.sheetNames=wb.SheetNames.slice();
+    state.fileName=(name||"clean").replace(/\.[^.]+$/,"");
+
+    state.activeSheet=null;
+    renderSheetTabs();
+    sheetTabsWrap.hidden = false;   // always show the tabs so the user picks
+
+    uploadView.hidden=true;
+    appView.hidden=false;
+    resetBtn.hidden=false;
+    tableEmpty.style.display="none";
+
+    // wait for an explicit sheet choice
+    appGrid.hidden=true;
+    choosePrompt.hidden=false;
+  }
+
+  function renderSheetTabs(){
+    sheetTabs.innerHTML="";
+    for(var i=0;i<state.sheetNames.length;i++){
+      (function(name){
+        var b=document.createElement("button");
+        b.className="sheettab"+(name===state.activeSheet?" active":"");
+        b.textContent=name;
+        b.setAttribute("role","tab");
+        b.setAttribute("data-sheet",name);
+        b.addEventListener("click",function(){ activateSheet(name); });
+        sheetTabs.appendChild(b);
+      })(state.sheetNames[i]);
+    }
+  }
+
+  function markActiveTab(){
+    var tabs=sheetTabs.querySelectorAll(".sheettab");
+    for(var i=0;i<tabs.length;i++){
+      tabs[i].classList.toggle("active", tabs[i].getAttribute("data-sheet")===state.activeSheet);
+    }
+  }
+
+  function activateSheet(name){
+    state.activeSheet=name;
+    markActiveTab();
+    choosePrompt.hidden=true;
+    appGrid.hidden=false;
+    var ws=state.workbook.Sheets[name];
+    var aoa=XLSX.utils.sheet_to_json(ws,{header:1, raw:true, defval:"", blankrows:false});
+    // normalize width
+    var ncols=0;
+    for(var i=0;i<aoa.length;i++){ if(aoa[i].length>ncols) ncols=aoa[i].length; }
+    if(ncols===0) ncols=1;
+    state.aoa=aoa;
+    state.ncols=ncols;
+    state.selectedCols={};
+    state.addCols={};
+    state.dropCols={};
+    state.rowCols={};
+    state.manualDeleted={};
+    rebuildColumnUI();
+    refresh();
+  }
+
+  function handleFile(file){
+    if(!file) return;
+    var reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        loadWorkbook(e.target.result, file.name);
+      }catch(err){
+        alert("לא הצלחתי לקרוא את הקובץ. ודאו שזה קובץ אקסל או CSV תקין.\n\n"+err.message);
+      }
+    };
+    reader.onerror=function(){ alert("שגיאה בקריאת הקובץ."); };
+    reader.readAsArrayBuffer(file);
+  }
+
+  // ---------- export ----------
+  function dropFilter(row){
+    var out=[];
+    for(var j=0;j<state.ncols;j++){ if(!state.dropCols[j]) out.push(j<row.length?row[j]:""); }
+    return out;
+  }
+
+  function buildOutputAoa(){
+    var res=state.computed || compute();
+    var out=[];
+    if(hasHeader.checked && state.aoa.length){
+      out.push(dropFilter(state.aoa[0].slice(0,state.ncols)));
+    }
+    for(var r=0;r<res.cleaned.length;r++){
+      if(res.deleted[r]) continue;
+      out.push(dropFilter(res.cleaned[r]));
+    }
+    return out;
+  }
+
+  function exportToXlsx(){
+    var aoa=buildOutputAoa();
+    var ws=XLSX.utils.aoa_to_sheet(aoa);
+    var wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "נקי");
+    XLSX.writeFile(wb, state.fileName+"_נקי.xlsx");
+  }
+
+  function exportToCsv(){
+    var aoa=buildOutputAoa();
+    var lines=aoa.map(function(row){
+      return row.map(function(cell){
+        var s=(cell===null||cell===undefined)?"":String(cell);
+        if(/[",\n\r]/.test(s)){ s='"'+s.replace(/"/g,'""')+'"'; }
+        return s;
+      }).join(",");
+    });
+    var csv="\uFEFF"+lines.join("\r\n");
+    var blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a");
+    a.href=url; a.download=state.fileName+"_נקי.csv";
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); },1000);
+  }
+
+  // ---------- events ----------
+  pickBtn.addEventListener("click",function(){ fileInput.click(); });
+  fileInput.addEventListener("change",function(e){ handleFile(e.target.files[0]); });
+
+  dropzone.addEventListener("dragover",function(e){ e.preventDefault(); dropzone.classList.add("drag"); });
+  dropzone.addEventListener("dragleave",function(){ dropzone.classList.remove("drag"); });
+  dropzone.addEventListener("drop",function(e){
+    e.preventDefault(); dropzone.classList.remove("drag");
+    if(e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+
+  resetBtn.addEventListener("click",function(){
+    appView.hidden=true; uploadView.hidden=false; resetBtn.hidden=true;
+    appGrid.hidden=true; choosePrompt.hidden=true; sheetTabsWrap.hidden=true;
+    fileInput.value=""; state.aoa=[]; state.computed=null; state.activeSheet=null;
+  });
+
+  hasHeader.addEventListener("change",function(){ rebuildColumnUI(); refresh(); });
+
+  selAll.addEventListener("click",function(){
+    for(var j=0;j<state.ncols;j++) state.selectedCols[j]=true;
+    renderColChips(); refresh();
+  });
+  selNone.addEventListener("click",function(){
+    state.selectedCols={}; renderColChips(); refresh();
+  });
+  rowSelAll.addEventListener("click",function(){
+    for(var j=0;j<state.ncols;j++) state.rowCols[j]=true;
+    renderRowColChips(); refresh();
+  });
+  rowSelNone.addEventListener("click",function(){
+    state.rowCols={}; renderRowColChips(); refresh();
+  });
+  addSelAll.addEventListener("click",function(){
+    for(var j=0;j<state.ncols;j++) state.addCols[j]=true;
+    renderAddColChips(); refresh();
+  });
+  addSelNone.addEventListener("click",function(){
+    state.addCols={}; renderAddColChips(); refresh();
+  });
+  dropSelAll.addEventListener("click",function(){
+    for(var j=0;j<state.ncols;j++) state.dropCols[j]=true;
+    renderDropColChips(); refresh();
+  });
+  dropSelNone.addEventListener("click",function(){
+    state.dropCols={}; renderDropColChips(); refresh();
+  });
+  clearManual.addEventListener("click",function(){
+    state.manualDeleted={}; refresh();
+  });
+
+  var deb=debounce(refresh,250);
+  wordsInput.addEventListener("input",deb);
+  rowValues.addEventListener("input",deb);
+  addTextInput.addEventListener("input",deb);
+  replacePairs.addEventListener("input",deb);
+  addPos.addEventListener("change",refresh);
+  addSep.addEventListener("change",refresh);
+  addSkipEmpty.addEventListener("change",refresh);
+  addSkipPresent.addEventListener("change",refresh);
+  dedupe.addEventListener("change",refresh);
+  wholeWord.addEventListener("change",refresh);
+  matchPos.addEventListener("change",refresh);
+  caseSens.addEventListener("change",refresh);
+  collapse.addEventListener("change",refresh);
+  dropEmpty.addEventListener("change",refresh);
+  rowMatch.addEventListener("change",refresh);
+
+  exportXlsx.addEventListener("click",exportToXlsx);
+  exportCsv.addEventListener("click",exportToCsv);
+
+  resetSettings.addEventListener("click",function(){
+    state.selectedCols={}; state.addCols={}; state.dropCols={}; state.rowCols={}; state.manualDeleted={};
+    wordsInput.value=""; replacePairs.value=""; rowValues.value=""; addTextInput.value="";
+    wholeWord.checked=false; caseSens.checked=false; collapse.checked=true; matchPos.value="anywhere";
+    addPos.value="end"; addSep.checked=true; addSkipEmpty.checked=true; addSkipPresent.checked=true;
+    rowMatch.value="contains"; dropEmpty.checked=false; dedupe.checked=false;
+    rebuildColumnUI(); refresh();
+  });
+
+  var refreshTimer=null;
+  refreshBtn.addEventListener("click",function(){
+    if(!state.aoa.length) return;
+    refresh();
+    refreshBtn.classList.remove("spinning");
+    void refreshBtn.offsetWidth; // restart animation
+    refreshBtn.classList.add("spinning","done");
+    refreshLabel.textContent="עודכן";
+    clearTimeout(refreshTimer);
+    refreshTimer=setTimeout(function(){
+      refreshBtn.classList.remove("done","spinning");
+      refreshLabel.textContent="רענן";
+    },1300);
+  });
+
+})();
+</script>
+</body>
+</html>
