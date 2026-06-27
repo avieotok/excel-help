@@ -305,6 +305,19 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   th.vlk-col, td.vlk-col{background:#FFF6E5;}
   tr:hover td.vlk-col{background:#FBEFCF;}
   th.vlk-col{color:#8a6d1f;}
+  .vlk-preview-head{font-size:12.5px;font-weight:800;color:var(--ink);margin:14px 0 8px;}
+  .vlk-preview{
+    max-width:980px;border:1px solid var(--line);border-radius:10px;overflow:auto;
+    max-height:240px;background:#fff;margin-bottom:6px;
+  }
+  .vlk-preview table{border-collapse:collapse;width:100%;font-size:12.5px;}
+  .vlk-preview th,.vlk-preview td{
+    border-bottom:1px solid var(--line-soft);border-left:1px solid var(--line-soft);
+    padding:6px 10px;text-align:right;white-space:nowrap;
+  }
+  .vlk-preview thead th{background:#f6f8f7;position:sticky;top:0;font-weight:800;}
+  .vlk-preview th.keycol,.vlk-preview td.keycol{background:#FFF6E5;font-weight:700;}
+  .vlk-preview .pv-more{padding:6px 10px;font-size:12px;color:var(--muted);background:#fafbfb;}
   td.empty-cell{color:#b6c0bc;font-style:italic;}
   tr.dup td{ background:#FFE3E1; }
   tr.dup:hover td{ background:#FBD3D0; }
@@ -601,6 +614,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             </div>
 
             <div id="vlkBody" hidden>
+              <div class="vlk-preview-head">תצוגה מקדימה של הקובץ השני — כך נראים השדות והנתונים בו:</div>
+              <div class="vlk-preview" id="vlkPreview"></div>
               <label class="field-label">2. העמודה המשותפת <u>בקובץ שלך</u>:</label>
               <select id="vlkMainKey"></select>
               <label class="field-label">3. אותה עמודה <u>בקובץ השני</u>:</label>
@@ -1252,6 +1267,31 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
 
   // ---- VLOOKUP second-file loading ----
+  function renderVlkPreview(){
+    var prev=$("vlkPreview");
+    if(!state.vlk.loaded){ prev.innerHTML=""; return; }
+    var headers=state.vlk.headers, rows=state.vlk.rows, sk=state.vlk.srcKey;
+    var LIMIT=8, shown=Math.min(rows.length, LIMIT);
+    var html=['<table><thead><tr>'];
+    for(var j=0;j<headers.length;j++){
+      html.push('<th class="'+(j===sk?'keycol':'')+'">'+escHtml(headers[j])+(j===sk?' 🔑':'')+'</th>');
+    }
+    html.push('</tr></thead><tbody>');
+    for(var r=0;r<shown;r++){
+      html.push('<tr>');
+      for(var c=0;c<headers.length;c++){
+        var v=rows[r] && rows[r][c]!=null ? fmt(rows[r][c]) : "";
+        html.push('<td class="'+(c===sk?'keycol':'')+'" title="'+escAttr(v)+'">'+(v===""?"—":escHtml(v))+'</td>');
+      }
+      html.push('</tr>');
+    }
+    html.push('</tbody></table>');
+    if(rows.length>shown){
+      html.push('<div class="pv-more">מוצגות '+shown+' שורות מתוך '+rows.length+' בקובץ השני.</div>');
+    }
+    prev.innerHTML=html.join("");
+  }
+
   function renderVlkBringChips(){
     vlkBringChips.innerHTML="";
     for(var j=0;j<state.vlk.headers.length;j++){
@@ -1294,6 +1334,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         vlkStatus.textContent="✓ נטען: "+file.name+" ("+state.vlk.rows.length+" שורות, "+headers.length+" עמודות)";
         populateVlkSrcKey();
         renderVlkBringChips();
+        renderVlkPreview();
         vlkBody.hidden=false;
         vlkPick.hidden=true;
         vlkFileActions.hidden=false;
@@ -1765,6 +1806,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   vlkSrcKey.addEventListener("change",function(){
     state.vlk.srcKey=parseInt(vlkSrcKey.value,10)||0;
     renderVlkBringChips();
+    renderVlkPreview();
     refresh();
   });
 
