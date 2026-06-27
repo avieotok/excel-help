@@ -274,6 +274,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   td.changed{background:var(--teal-soft);}
   tr:hover td.changed{background:#cdeae4;}
   td.empty-cell{color:#b6c0bc;font-style:italic;}
+  tr.dup td{ background:#FFE3E1; }
+  tr.dup:hover td{ background:#FBD3D0; }
+  tr.dup td.changed{ background:#F4D9D6; }
   tr.deleted td{
     color:#b3bdb9;text-decoration:line-through;text-decoration-color:var(--coral);
     background:repeating-linear-gradient(135deg, #fcf0ef 0 8px, #fbe7e5 8px 16px);
@@ -500,14 +503,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
           <div class="pcard">
             <h4><span class="step">7</span> איחוד רשומות כפולות</h4>
-            <p class="sub">מאחד שורות בעלות אותו ערך בעמודת המפתח (למשל מק"ט) לשורה אחת — סוכם כמויות, מאחד מיקונים, ועוד.</p>
+            <p class="sub">בחרו עמודת מפתח לזיהוי כפילויות. אפשר לסמן אותן באדום בהיר, ולאחד אותן לשורה אחת.</p>
 
-            <label class="opt" style="margin-top:0"><input type="checkbox" id="consolidateOn"> הפעל איחוד רשומות</label>
+            <label class="field-label" style="margin-top:0">עמודת מפתח (זיהוי כפילות):</label>
+            <select id="keyCol" aria-label="עמודת מפתח"></select>
+
+            <label class="opt"><input type="checkbox" id="highlightDupes"> סמן שורות כפולות באדום בהיר</label>
+            <label class="opt"><input type="checkbox" id="consolidateOn"> אחד את הכפילויות לשורה אחת</label>
 
             <div id="consolidateBody" hidden>
-              <label class="field-label">עמודת מפתח (זיהוי כפילות):</label>
-              <select id="keyCol" aria-label="עמודת מפתח"></select>
-
               <label class="field-label" style="margin-top:14px">איך לאחד כל עמודה:</label>
               <div id="aggList" class="agg-list"></div>
 
@@ -590,6 +594,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var dropColChips=$("dropColChips"), dropSelAll=$("dropSelAll"), dropSelNone=$("dropSelNone");
   var dedupe=$("dedupe"), statCols=$("statCols"), resetSettings=$("resetSettings");
   var consolidateOn=$("consolidateOn"), consolidateBody=$("consolidateBody"), keyCol=$("keyCol");
+  var highlightDupes=$("highlightDupes");
   var aggList=$("aggList"), addCount=$("addCount"), joinSep=$("joinSep");
   var rowValues=$("rowValues"), rowColChips=$("rowColChips"), rowMatch=$("rowMatch"), dropEmpty=$("dropEmpty");
   var rowSelAll=$("rowSelAll"), rowSelNone=$("rowSelNone");
@@ -763,7 +768,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       reasons:[],       // string reason per deleted row
       cellsChanged:0,
       rowsDeleted:0,
-      droppedCols:droppedCount
+      droppedCols:droppedCount,
+      dupRows:{}
     };
 
     for(var r=0;r<rows.length;r++){
@@ -826,6 +832,21 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       result.deleted.push(del);
       result.reasons.push(reason);
       if(del) result.rowsDeleted++;
+    }
+
+    // mark duplicate rows by key column (among non-deleted rows)
+    if(highlightDupes.checked && state.keyCol!==null && state.keyCol!==undefined && state.keyCol<state.ncols){
+      var kc=state.keyCol, counts={}, rowKey=[];
+      for(var dr=0;dr<result.cleaned.length;dr++){
+        if(result.deleted[dr]){ rowKey.push(null); continue; }
+        var kv=valStr(result.cleaned[dr][kc]).trim();
+        rowKey.push(kv);
+        if(kv!=="") counts[kv]=(counts[kv]||0)+1;
+      }
+      for(var dr2=0;dr2<rowKey.length;dr2++){
+        var kv2=rowKey[dr2];
+        if(kv2 && counts[kv2]>1) result.dupRows[dr2]=true;
+      }
     }
 
     state.computed=result;
@@ -929,7 +950,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     for(var r=0;r<shown;r++){
       var deleted=res.deleted[r];
       var changed=res.changedCells[r];
-      html.push('<tr class="'+(deleted?'deleted':'')+'" data-r="'+r+'">');
+      html.push('<tr class="'+(deleted?'deleted':(res.dupRows&&res.dupRows[r]?'dup':''))+'" data-r="'+r+'">');
       html.push('<td class="rownum">'+(r+1)+'</td>');
       html.push('<td class="del-col"><input type="checkbox" data-del="'+r+'" '+(state.manualDeleted[r]?'checked':'')+' aria-label="מחק שורה '+(r+1)+'"></td>');
       for(var c=0;c<state.ncols;c++){
@@ -1079,7 +1100,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     html.push('</tr></thead><tbody>');
     for(var r=0;r<shown;r++){
       var item=cons.rows[r];
-      html.push('<tr><td class="rownum">'+(r+1)+'</td>');
+      var dupClass = (highlightDupes.checked && item.count>1) ? ' class="dup"' : '';
+      html.push('<tr'+dupClass+'><td class="rownum">'+(r+1)+'</td>');
       cols.forEach(function(j){
         var v=fmt(item.row[j]);
         html.push('<td class="'+(v===""?"empty-cell":"")+'" title="'+escAttr(v)+'">'+(v===""?"—":escHtml(v))+'</td>');
@@ -1362,6 +1384,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     consolidateBody.hidden = !consolidateOn.checked;
     refresh();
   });
+  highlightDupes.addEventListener("change",refresh);
   keyCol.addEventListener("change",function(e){
     state.keyCol=parseInt(e.target.value,10);
     renderAggList();
@@ -1385,7 +1408,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     wholeWord.checked=false; caseSens.checked=false; collapse.checked=true; matchPos.value="anywhere";
     addPos.value="end"; addSep.checked=true; addSkipEmpty.checked=true; addSkipPresent.checked=true;
     rowMatch.value="contains"; dropEmpty.checked=false; dedupe.checked=false;
-    consolidateOn.checked=false; consolidateBody.hidden=true;
+    consolidateOn.checked=false; consolidateBody.hidden=true; highlightDupes.checked=false;
     state.aggMethods={}; state.keyCol=null; addCount.checked=true; joinSep.value=", ";
     rebuildColumnUI(); refresh();
   });
