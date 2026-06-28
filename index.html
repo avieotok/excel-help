@@ -2204,6 +2204,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     var ws=XLSX.utils.aoa_to_sheet(aoa);
     var wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "נקי");
+    wb.Workbook={Views:[{RTL:true}]}; // הקובץ ייפתח מימין לשמאל — עמודה A בצד ימין
     XLSX.writeFile(wb, state.fileName+"_נקי.xlsx");
   }
 
