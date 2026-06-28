@@ -342,6 +342,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .si-keep:hover{border-color:var(--teal);color:var(--teal-deep);}
   .suggest-none{font-size:13px;color:var(--teal-deep);font-weight:700;margin-top:12px;}
   .si-all{margin:4px 0 12px;}
+  .quick-pivot-card{max-width:560px;margin:18px auto 0;background:var(--teal-soft);border:1px solid #bfe5de;border-radius:16px;padding:20px 22px;text-align:center;}
+  .quick-pivot-card .qp-head{font-size:16px;font-weight:800;color:var(--teal-deep);margin-bottom:6px;}
+  .quick-pivot-card p{font-size:13px;color:#0c5a50;line-height:1.6;margin:0 0 14px;}
+  .pivot-cta{background:var(--teal)!important;color:#fff!important;border:none!important;}
+  .pivot-cta:hover{background:var(--teal-deep)!important;}
+  .quick-pivot-inline{background:var(--teal-soft);border:1px solid #bfe5de;border-radius:12px;padding:14px;margin-bottom:14px;}
+  .quick-pivot-inline .sub{margin-bottom:0;}
   .vlk-preview{
     max-width:980px;border:1px solid var(--line);border-radius:10px;overflow:auto;
     max-height:240px;background:#fff;margin-bottom:6px;
@@ -459,6 +466,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <button class="pick-btn" id="pickBtn">בחירת קובץ</button>
       <input type="file" id="fileInput" accept=".xlsx,.xls,.csv,.tsv" class="visually-hidden">
       <div class="formats">נתמך: <code>.xlsx</code> <code>.xls</code> <code>.csv</code> — הקובץ לא עוזב את המחשב שלך</div>
+    </div>
+
+    <div class="quick-pivot-card">
+      <div class="qp-head">📊 פיווט מלאי מהיר</div>
+      <p>יש לכם קובץ מלאי (עם העמודות מחסן · מק"ט · תאור מוצר · יתרה ביח' מפעל)? לחצו כאן ובחרו את הקובץ — הפיווט ייבנה אוטומטית: שורות לפי מק"ט ותאור, סכום היתרה, וסינון לפי מחסן. מוכן לייצוא.</p>
+      <button class="pick-btn pivot-cta" id="pivotFileBtn">📂 בחר קובץ מלאי והפעל פיווט</button>
+      <input type="file" id="pivotFileInput" accept=".xlsx,.xls,.csv,.tsv" class="visually-hidden">
     </div>
   </section>
 
@@ -708,10 +722,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
           <div class="pcard pane" id="pane9">
             <h4><span class="step">9</span> טבלת ציר — סיכום (Pivot)</h4>
-            <p class="sub">מסכם את הנתונים לטבלה קטנה: בוחרים עמודה לקיבוץ, ומקבלים סיכום או ספירה לכל ערך. לדוגמה: כמה כמות יש בכל מיקום.</p>
+            <p class="sub">מסכם את הנתונים לטבלה קטנה. בוחרים עמודה לקיבוץ (ואפשר עמודה שנייה), מה לחשב (סכום/ספירה/ממוצע/מינ/מקס), ואפשר גם לסנן לערך מסוים. לדוגמה: סכום היתרה לכל מק"ט ותיאור, מסונן למחסן מסוים.</p>
 
             <div class="guide-box">
               <b>מה זה נותן?</b> במקום אלפי שורות — שורה אחת לכל ערך, עם סיכום. למשל כל מיקום והכמות הכוללת בו.
+            </div>
+
+            <div class="quick-pivot-inline">
+              <button class="pick-btn2" id="pivotFileBtn2">📂 בחר קובץ מלאי והפעל פיווט אוטומטי</button>
+              <p class="sub" style="margin-top:8px">בוחרים קובץ מלאי — הפיווט נבנה אוטומטית לפי ההגדרות הקבועות (מק"ט+תאור בשורות, סכום יתרה, סינון מחסן). או בנו פיווט ידני למטה. ⬇</p>
             </div>
 
             <label class="opt" style="margin-top:0"><input type="checkbox" id="pivotOn"> הצג טבלת ציר (מחליף את התצוגה)</label>
@@ -719,6 +738,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <div id="pivotBody" hidden>
               <label class="field-label">קבץ לפי (כל ערך יהיה שורה):</label>
               <select id="pivotGroup"></select>
+
+              <label class="field-label">וגם לפי (אופציונלי — עמודה שנייה לשורות):</label>
+              <select id="pivotGroup2"><option value="">— ללא —</option></select>
+
               <label class="field-label">מה לחשב:</label>
               <select id="pivotAgg">
                 <option value="count">ספירה — כמה שורות בכל ערך</option>
@@ -730,6 +753,21 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
               <div id="pivotValWrap" hidden>
                 <label class="field-label">עמודת המספרים לחישוב:</label>
                 <select id="pivotVal"></select>
+              </div>
+
+              <label class="field-label">מיון התוצאות:</label>
+              <select id="pivotSort">
+                <option value="group">לפי העמודה הראשונה (0–9 / א–ת)</option>
+                <option value="value">לפי הערך (מהגבוה לנמוך)</option>
+              </select>
+
+              <label class="opt" style="margin-top:12px"><input type="checkbox" id="pivotHideZero"> הסתר שורות שבהן התוצאה היא 0 (למשל פריטים ללא מלאי)</label>
+
+              <label class="field-label">סינון (אופציונלי — להציג רק ערך מסוים):</label>
+              <select id="pivotFilterCol"><option value="">— ללא סינון —</option></select>
+              <div id="pivotFilterValWrap" hidden>
+                <label class="field-label">הצג רק:</label>
+                <select id="pivotFilterVal"></select>
               </div>
             </div>
           </div>
@@ -813,7 +851,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     computed:null      // last compute result
   };
 
-  var PREVIEW_LIMIT = 600;
+  var PREVIEW_LIMIT = 10000;
+  var RESULT_LIMIT = 100000;
   var activePane = "pane1";
   function activeViewMode(){
     if(activePane==="pane9" && isPivotActive()) return "pivot";
@@ -842,6 +881,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var vlkSrcSame=$("vlkSrcSame"), vlkSrcOther=$("vlkSrcOther"), vlkSameWrap=$("vlkSameWrap"), vlkOtherWrap=$("vlkOtherWrap"), vlkSheet=$("vlkSheet"), vlkSameNote=$("vlkSameNote");
   var vlkMainKey=$("vlkMainKey"), vlkSrcKey=$("vlkSrcKey"), vlkBringChips=$("vlkBringChips");
   var pivotOn=$("pivotOn"), pivotBody=$("pivotBody"), pivotGroup=$("pivotGroup"), pivotAgg=$("pivotAgg"), pivotVal=$("pivotVal"), pivotValWrap=$("pivotValWrap");
+  var pivotGroup2=$("pivotGroup2"), pivotFilterCol=$("pivotFilterCol"), pivotFilterVal=$("pivotFilterVal"), pivotFilterValWrap=$("pivotFilterValWrap");
+  var pivotSort=$("pivotSort");
+  var pivotHideZero=$("pivotHideZero");
   var sumCol=$("sumCol"), sumBtn=$("sumBtn"), sumResult=$("sumResult"), sumInOutput=$("sumInOutput");
   var dropHeaderRow=$("dropHeaderRow"), dropHeaderWrap=$("dropHeaderWrap");
   var aggList=$("aggList"), addCount=$("addCount"), joinSep=$("joinSep");
@@ -1319,6 +1361,43 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
 
   // ---------- master refresh ----------
+  function goToTab(paneId){
+    var all=document.querySelectorAll(".ptab");
+    for(var k=0;k<all.length;k++){ all[k].classList.toggle("active", all[k].getAttribute("data-pane")===paneId); }
+    var panes=document.querySelectorAll(".pane");
+    for(var p=0;p<panes.length;p++) panes[p].classList.remove("show");
+    var pane=document.getElementById(paneId);
+    if(pane) pane.classList.add("show");
+    activePane=paneId;
+  }
+
+  // Auto-apply the fixed pivot from the Word-doc instructions when an inventory file is loaded:
+  // Filter = מחסן, Rows = מק"ט + תאור מוצר, Values = sum of יתרה ביח' מפעל.
+  function findHeaderIdx(test){
+    var names=headerNames();
+    for(var j=0;j<names.length;j++){ if(test(String(names[j]||"").trim())) return j; }
+    return -1;
+  }
+  function autoConfigPivotIfInventory(){
+    if(!hasHeader.checked) return false;
+    var whCol  = findHeaderIdx(function(h){ return h.indexOf("מחסן")!==-1; });
+    var skuCol = findHeaderIdx(function(h){ return h.indexOf("מק\"ט")!==-1 || h.indexOf("מקט")!==-1; });
+    var descCol= findHeaderIdx(function(h){ return h.indexOf("תאור")!==-1 || h.indexOf("תיאור")!==-1; });
+    var balCol = findHeaderIdx(function(h){ return h.indexOf("יתרה")!==-1 && h.indexOf("מפעל")!==-1; });
+    if(skuCol<0 || descCol<0 || balCol<0) return false; // not the inventory layout
+    // configure pivot
+    pivotOn.checked=true; pivotBody.hidden=false;
+    pivotGroup.value=String(skuCol);
+    pivotGroup2.value=String(descCol);
+    pivotAgg.value="sum"; pivotValWrap.hidden=false;
+    pivotVal.value=String(balCol);
+    if(whCol>=0){ pivotFilterCol.value=String(whCol); populatePivotFilterVals(); pivotFilterVal.value=""; }
+    else { pivotFilterCol.value=""; pivotFilterValWrap.hidden=true; }
+    if(pivotHideZero) pivotHideZero.checked=true;
+    goToTab("pane9");
+    return true;
+  }
+
   function refresh(){
     if(!state.aoa.length) return;
     var res=compute();
@@ -1339,22 +1418,34 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
 
   function renderPivotTable(piv){
-    var html=['<table><thead><tr>',
-      '<th class="rownum-h">#</th>',
-      '<th>'+escHtml(piv.groupName)+'</th>',
-      '<th>'+escHtml(piv.resultName)+'</th>',
-      '</tr></thead><tbody>'];
-    var total=piv.rows.length, shown=Math.min(total, PREVIEW_LIMIT);
+    var head=['<table><thead><tr>','<th class="rownum-h">#</th>','<th>'+escHtml(piv.groupName)+'</th>'];
+    if(piv.hasG2) head.push('<th>'+escHtml(piv.group2Name)+'</th>');
+    head.push('<th>'+escHtml(piv.resultName)+'</th>');
+    head.push('</tr></thead><tbody>');
+    var html=head;
+    var total=piv.rows.length, shown=Math.min(total, RESULT_LIMIT);
     for(var r=0;r<shown;r++){
-      var g=piv.rows[r][0], v=piv.rows[r][1];
-      html.push('<tr><td class="rownum">'+(r+1)+'</td><td>'+escHtml(g)+'</td><td class="rownum" style="text-align:right;font-weight:700">'+(typeof v==="number"?v.toLocaleString("he-IL"):escHtml(v))+'</td></tr>');
+      var row=piv.rows[r];
+      var v=row[piv.hasG2?2:1];
+      var cells='<td class="rownum">'+(r+1)+'</td>';
+      cells+='<td>'+escHtml(row[0])+'</td>';
+      if(piv.hasG2) cells+='<td>'+escHtml(row[1])+'</td>';
+      cells+='<td class="rownum" style="text-align:right;font-weight:700">'+(typeof v==="number"?v.toLocaleString("he-IL"):escHtml(v))+'</td>';
+      html.push('<tr>'+cells+'</tr>');
     }
     var totLabel=(piv.aggKind==="avg")?"ממוצע כללי":(piv.aggKind==="min")?"המינימום":(piv.aggKind==="max")?"המקסימום":"סה\"כ";
-    html.push('<tr style="background:#f3f6f5;font-weight:800"><td></td><td>'+totLabel+'</td><td class="rownum" style="text-align:right;font-weight:800">'+piv.total.toLocaleString("he-IL")+'</td></tr>');
+    var totRow='<tr style="background:#f3f6f5;font-weight:800"><td></td><td>'+totLabel+'</td>';
+    if(piv.hasG2) totRow+='<td></td>';
+    totRow+='<td class="rownum" style="text-align:right;font-weight:800">'+piv.total.toLocaleString("he-IL")+'</td>';
+    totRow+='</tr>';
+    html.push(totRow);
     html.push('</tbody></table>');
     tablewrap.innerHTML=html.join("");
     tableNote.hidden=false;
-    tableNote.textContent="טבלת ציר: "+piv.rows.length.toLocaleString("he-IL")+" ערכים שונים. הורידו אותה עם 'הורד אקסל נקי'.";
+    var note="טבלת ציר: "+piv.rows.length.toLocaleString("he-IL")+" שורות.";
+    if(piv.filterText) note="מסונן לפי "+piv.filterText+" · "+note;
+    note+=" הורידו אותה עם 'הורד אקסל נקי'.";
+    tableNote.textContent=note;
   }
 
   function renderDropColChips(){
@@ -1407,13 +1498,45 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     }
     if(keepValue && cur!=="" && parseInt(cur,10)<names.length) sel.value=cur;
   }
+  function fillSelectWithNone(sel, names, noneLabel){
+    var cur=sel.value;
+    sel.innerHTML="";
+    var o0=document.createElement("option"); o0.value=""; o0.textContent=noneLabel; sel.appendChild(o0);
+    for(var j=0;j<names.length;j++){
+      var o=document.createElement("option"); o.value=String(j); o.textContent=names[j]; sel.appendChild(o);
+    }
+    if(cur!=="" && parseInt(cur,10)<names.length) sel.value=cur; else sel.value="";
+  }
   function populateMainSelects(){
     var names=uiHeaderNames();
     fillSelect(vlkMainKey, names, true);
     fillSelect(pivotGroup, names, true);
     fillSelect(pivotVal, names, true);
     fillSelect(sumCol, names, true);
+    fillSelectWithNone(pivotGroup2, names, "— ללא —");
+    fillSelectWithNone(pivotFilterCol, names, "— ללא סינון —");
+    populatePivotFilterVals();
     if(sumResult) sumResult.hidden=true;
+  }
+  function populatePivotFilterVals(){
+    var col=pivotFilterCol.value;
+    if(col===""){ pivotFilterValWrap.hidden=true; pivotFilterVal.innerHTML=""; return; }
+    var ci=parseInt(col,10);
+    var rows=dataRows(), seen={}, vals=[];
+    for(var i=0;i<rows.length;i++){
+      var v=valStr(rows[i][ci]).trim();
+      if(v==="") continue;
+      if(!seen[v]){ seen[v]=true; vals.push(v); }
+    }
+    vals.sort(function(a,b){ return a.localeCompare(b,"he",{numeric:true}); });
+    var cur=pivotFilterVal.value;
+    pivotFilterVal.innerHTML="";
+    var oAll=document.createElement("option"); oAll.value=""; oAll.textContent="— הכול —"; pivotFilterVal.appendChild(oAll);
+    for(var k=0;k<vals.length;k++){
+      var o=document.createElement("option"); o.value=vals[k]; o.textContent=vals[k]; pivotFilterVal.appendChild(o);
+    }
+    if(cur && seen[cur]) pivotFilterVal.value=cur; else pivotFilterVal.value="";
+    pivotFilterValWrap.hidden=false;
   }
 
   // ---- VLOOKUP second-file loading ----
@@ -1599,7 +1722,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   function renderConsolidatedTable(cons){
     var names=uiHeaderNames();
     var cols=[]; for(var j=0;j<state.ncols;j++){ if(!state.dropCols[j]) cols.push(j); }
-    var total=cons.rows.length, shown=Math.min(total, PREVIEW_LIMIT);
+    var total=cons.rows.length, shown=Math.min(total, RESULT_LIMIT);
     var html=['<table><thead><tr>','<th class="rownum-h">#</th>'];
     cols.forEach(function(j){
       var keyMark = (j===state.keyCol) ? ' <span class="changed-tag" title="עמודת מפתח"></span>' : '';
@@ -1631,6 +1754,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     state.workbook=wb;
     state.sheetNames=wb.SheetNames.slice();
     state.fileName=(name||"clean").replace(/\.[^.]+$/,"");
+
+    // reset analysis modes on every new file unless this load was triggered by the pivot button
+    if(!loadForPivot){
+      pivotOn.checked=false; pivotBody.hidden=true; pivotValWrap.hidden=true; pivotFilterValWrap.hidden=true;
+      pivotGroup2.value=""; pivotFilterCol.value="";
+      consolidateOn.checked=false; if(consolidateBody) consolidateBody.hidden=true;
+      goToTab("pane1");
+    }
 
     state.activeSheet=null;
     renderSheetTabs();
@@ -1692,6 +1823,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     state.keyCol=null;
     state.manualDeleted={};
     rebuildColumnUI();
+    if(loadForPivot){
+      var okPivot=autoConfigPivotIfInventory();
+      loadForPivot=false;
+      refresh();
+      if(!okPivot){
+        alert("הקובץ נטען, אבל לא זוהו עמודות המלאי הצפויות (מק\"ט, תאור מוצר, יתרה ביח' מפעל).\nאפשר לבנות פיווט ידני בלשונית 'טבלת ציר'.");
+      }
+      return;
+    }
     refresh();
   }
 
@@ -1924,38 +2064,63 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
   function computePivot(rows){
     var gCol=parseInt(pivotGroup.value,10);
+    var g2Raw=pivotGroup2.value;
+    var g2Col=(g2Raw==="")?-1:parseInt(g2Raw,10);
+    var hasG2=(g2Col>=0 && g2Col<state.ncols && g2Col!==gCol);
     var agg=pivotAgg.value;
     var vCol=parseInt(pivotVal.value,10);
-    var order=[], lists={}, counts={};
+    // optional filter
+    var fRaw=pivotFilterCol.value;
+    var fCol=(fRaw==="")?-1:parseInt(fRaw,10);
+    var fVal=pivotFilterVal.value;
+    var filterActive=(fCol>=0 && fCol<state.ncols && fVal!=="" && !pivotFilterValWrap.hidden);
+
+    var order=[], lists={}, counts={}, g1of={}, g2of={};
     for(var i=0;i<rows.length;i++){
-      var g=valStr(rows[i][gCol]).trim(); if(g==="") g="(ריק)";
-      if(!(g in lists)){ lists[g]=[]; counts[g]=0; order.push(g); }
-      counts[g]+=1;
+      if(filterActive && valStr(rows[i][fCol]).trim()!==fVal) continue;
+      var g1=valStr(rows[i][gCol]).trim(); if(g1==="") g1="(ריק)";
+      var g2=hasG2 ? (valStr(rows[i][g2Col]).trim()||"(ריק)") : "";
+      var key=hasG2 ? (g1+"\u0001"+g2) : g1;
+      if(!(key in lists)){ lists[key]=[]; counts[key]=0; order.push(key); g1of[key]=g1; g2of[key]=g2; }
+      counts[key]+=1;
       if(agg!=="count"){
         var t=valStr(rows[i][vCol]).trim();
         var n=Number(t.replace(/,/g,""));
-        if(t!=="" && !isNaN(n)) lists[g].push(n);
+        if(t!=="" && !isNaN(n)) lists[key].push(n);
       }
     }
-    function calc(g){
-      if(agg==="count") return counts[g];
-      var a=lists[g]; if(!a.length) return 0;
+    function calc(key){
+      if(agg==="count") return counts[key];
+      var a=lists[key]; if(!a.length) return 0;
       var s=0; for(var k=0;k<a.length;k++) s+=a[k];
-      if(agg==="sum") return s;
+      if(agg==="sum") return Math.round(s*1e6)/1e6;
       if(agg==="avg") return Math.round(s/a.length*100)/100;
       if(agg==="min") return Math.min.apply(null,a);
       if(agg==="max") return Math.max.apply(null,a);
       return s;
     }
-    var out=order.map(function(g){ return [g, calc(g)]; });
-    out.sort(function(a,b){ return b[1]-a[1]; });
+    var out=order.map(function(key){
+      return hasG2 ? [g1of[key], g2of[key], calc(key)] : [g1of[key], calc(key)];
+    });
+    var valIdx=hasG2?2:1;
+    if(pivotHideZero && pivotHideZero.checked){
+      out=out.filter(function(row){ return Number(row[valIdx])!==0; });
+    }
+    var sortMode=(pivotSort && pivotSort.value)||"group";
+    if(sortMode==="value"){
+      out.sort(function(a,b){ return b[valIdx]-a[valIdx]; });
+    } else {
+      out.sort(function(a,b){
+        var c=String(a[0]).localeCompare(String(b[0]),"he",{numeric:true,sensitivity:"base"});
+        if(c!==0 || !hasG2) return c;
+        return String(a[1]).localeCompare(String(b[1]),"he",{numeric:true,sensitivity:"base"});
+      });
+    }
     var names=headerNames();
     var labels={count:"מספר שורות", sum:"סכום של ", avg:"ממוצע של ", min:"מינימום של ", max:"מקסימום של "};
     var resultName = (agg==="count") ? "מספר שורות" : (labels[agg]+(names[vCol]||""));
-    // total row meaningful for count/sum; for avg/min/max show overall over all rows
     var total;
-    if(agg==="count"){ total=0; for(var c=0;c<out.length;c++) total+=out[c][1]; }
-    else if(agg==="sum"){ total=0; for(var s2=0;s2<out.length;s2++) total+=out[s2][1]; }
+    if(agg==="count"||agg==="sum"){ total=0; for(var c=0;c<out.length;c++) total+=out[c][valIdx]; total=Math.round(total*1e6)/1e6; }
     else {
       var allNums=[]; for(var gk in lists){ for(var z=0;z<lists[gk].length;z++) allNums.push(lists[gk][z]); }
       if(!allNums.length) total=0;
@@ -1963,7 +2128,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       else if(agg==="min") total=Math.min.apply(null,allNums);
       else total=Math.max.apply(null,allNums);
     }
-    return { rows:out, total:total, groupName:names[gCol]||"", resultName:resultName, aggKind:agg };
+    return { rows:out, total:total, groupName:names[gCol]||"", group2Name: hasG2?(names[g2Col]||""):null,
+             resultName:resultName, aggKind:agg, hasG2:hasG2,
+             filterText: filterActive ? ((names[fCol]||"")+" = "+fVal) : null };
   }
   // surviving cleaned rows (post deletion)
   function survivingRows(res){
@@ -1978,10 +2145,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
     if(mode==="pivot"){
       var piv=computePivot(survivingRows(res));
-      var po=[[piv.groupName, piv.resultName]];
-      for(var pi=0;pi<piv.rows.length;pi++){ po.push([piv.rows[pi][0], piv.rows[pi][1]]); }
+      var po = piv.hasG2 ? [[piv.groupName, piv.group2Name, piv.resultName]] : [[piv.groupName, piv.resultName]];
+      for(var pi=0;pi<piv.rows.length;pi++){
+        po.push(piv.hasG2 ? [piv.rows[pi][0], piv.rows[pi][1], piv.rows[pi][2]] : [piv.rows[pi][0], piv.rows[pi][1]]);
+      }
       var ptl=(piv.aggKind==="avg")?"ממוצע כללי":(piv.aggKind==="min")?"המינימום":(piv.aggKind==="max")?"המקסימום":"סה\"כ";
-      po.push([ptl, piv.total]);
+      po.push(piv.hasG2 ? [ptl, "", piv.total] : [ptl, piv.total]);
       return po;
     }
 
@@ -2061,6 +2230,16 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   pickBtn.addEventListener("click",function(){ fileInput.click(); });
   fileInput.addEventListener("change",function(e){ handleFile(e.target.files[0]); });
 
+  var loadForPivot=false;
+  var pivotFileInput=$("pivotFileInput");
+  function triggerPivotFilePick(){ loadForPivot=true; pivotFileInput.value=""; pivotFileInput.click(); }
+  $("pivotFileBtn").addEventListener("click", triggerPivotFilePick);
+  var pivotFileBtn2=$("pivotFileBtn2"); if(pivotFileBtn2) pivotFileBtn2.addEventListener("click", triggerPivotFilePick);
+  pivotFileInput.addEventListener("change",function(e){
+    if(e.target.files[0]) handleFile(e.target.files[0]);
+    else loadForPivot=false;
+  });
+
   dropzone.addEventListener("dragover",function(e){ e.preventDefault(); dropzone.classList.add("drag"); });
   dropzone.addEventListener("dragleave",function(){ dropzone.classList.remove("drag"); });
   dropzone.addEventListener("drop",function(e){
@@ -2075,14 +2254,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     for(var i=0;i<tabs.length;i++){
       tabs[i].addEventListener("click",function(e){
         var target=e.currentTarget.getAttribute("data-pane");
-        var all=document.querySelectorAll(".ptab");
-        for(var k=0;k<all.length;k++) all[k].classList.remove("active");
-        e.currentTarget.classList.add("active");
-        var panes=document.querySelectorAll(".pane");
-        for(var p=0;p<panes.length;p++) panes[p].classList.remove("show");
-        var pane=document.getElementById(target);
-        if(pane) pane.classList.add("show");
-        activePane = target;
+        goToTab(target);
         if(panelScroll) panelScroll.scrollTop=0;
         refresh();
       });
@@ -2190,6 +2362,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     refresh();
   });
   pivotGroup.addEventListener("change",refresh);
+  pivotGroup2.addEventListener("change",refresh);
+  pivotSort.addEventListener("change",refresh);
+  pivotHideZero.addEventListener("change",refresh);
+  pivotFilterCol.addEventListener("change",function(){ populatePivotFilterVals(); refresh(); });
+  pivotFilterVal.addEventListener("change",refresh);
   pivotAgg.addEventListener("change",function(){
     pivotValWrap.hidden=(pivotAgg.value==="count");
     refresh();
@@ -2288,6 +2465,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     state.aggMethods={}; state.keyCol=null; addCount.checked=true; joinSep.value=", ";
     state.vlk={loaded:false, headers:[], rows:[], srcKey:0, bring:{}, source:"same"}; vlkBody.hidden=true; vlkStatus.textContent=""; vlkFileActions.hidden=true; vlkPick.hidden=false;
     pivotOn.checked=false; pivotBody.hidden=true; pivotAgg.value="count"; pivotValWrap.hidden=true;
+    pivotGroup2.value=""; pivotFilterCol.value=""; pivotFilterValWrap.hidden=true; pivotFilterVal.innerHTML="";
+    if(pivotSort) pivotSort.value="group";
+    if(pivotHideZero) pivotHideZero.checked=false;
     sumInOutput.checked=false; sumResult.hidden=true; dropHeaderRow.checked=false;
     rebuildColumnUI(); refresh();
   });
